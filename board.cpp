@@ -40,7 +40,7 @@ void addtovector(string input,int col){
             string square = "";
             square += row;
             square += to_string(col);
-            Wsuperpawn.push_back(square);
+            Wgirafe.push_back(square);
         }else if(input[i] == 'M'){
             string square = "";
             square += row;
@@ -80,7 +80,7 @@ void addtovector(string input,int col){
             string square = "";
             square += row;
             square += to_string(col);
-            Bsuperpawn.push_back(square);
+            Bgirafe.push_back(square);
         }else if(input[i] == 'm'){
             string square = "";
             square += row;
@@ -196,17 +196,18 @@ void clearArray(){
 }
 int main(){
 
-    string position = "";   //represent a position
-    string turn = "";   //represent a players turn
-    string m_number = "";   //represent a number of moves
-
-    string split = "";   //helps to split a string
-
+    
     //taking input
     int N;
     cin>>N;
     cin.ignore();
     for(int i=0;i<N;i++){
+
+        string position = "";   //represent a position
+        string turn = "";   //represent a players turn
+        string m_number = "";   //represent a number of moves
+        string split = "";   //helps to split a string
+
         string fen;
         getline(cin,fen);
         // fen = "2l4/7/4z2/4c2/PP2EP1/3L2p/7 b 23";
@@ -226,8 +227,7 @@ int main(){
                     index++;
                     split = "";
                 }
-            }
-            else{
+            }else{
                 split += x;
                 m_number = split;    // last for number of moves
             }
@@ -288,20 +288,15 @@ int main(){
                     index++;
                     split = "";
                 }
-            }
-            else{
-
+            }else{
                 if(isdigit(x)){
                     int s = x-'0';
-                    // cout<<"number: "<<s<<endl;
                     for(int j=0;j<s;j++){
                         split += "0";
                     }
-                }
-                else{
+                }else{
                     split += x;
                 }
-                
                 file1 = split;    // 1st rank
             }
         }
