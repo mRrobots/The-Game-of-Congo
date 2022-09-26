@@ -2,7 +2,8 @@
 #include <vector>
 using namespace std;
 
-
+vector<string>ranks_vector;
+vector<string>files_vector;
 
 vector<string> Wpawn;
 vector<string> Wsuperpawn;
@@ -21,6 +22,103 @@ vector<string> Belephant;
 vector<string> Blion;
 vector<string> Bcrocodile;
 vector<string> Bzebra;
+
+void newadd(){
+    //searchin files
+    for(int i=0;i<7;i++){
+        //searching for ranks
+        for(int j=0;j<7;j++){
+            //search by ranks
+            char row = (char)('a'+i);
+            int col = 7-j;
+            if(files_vector.at(j)[i] == 'P'){
+            string square = "";
+            square += row;
+            square += to_string(col);
+            Wpawn.push_back(square);
+            }else if(files_vector.at(j)[i] == 'S'){
+                string square = "";
+                square += row;
+                square += to_string(col);
+                Wsuperpawn.push_back(square);
+            }else if(files_vector.at(j)[i] == 'G'){
+                string square = "";
+                square += row;
+                square += to_string(col);
+                Wgirafe.push_back(square);
+            }else if(files_vector.at(j)[i] == 'M'){
+                string square = "";
+                square += row;
+                square += to_string(col);
+                Wmonkey.push_back(square);
+            }else if(files_vector.at(j)[i] == 'E'){
+                string square = "";
+                square += row;
+                square += to_string(col);
+                Welephant.push_back(square);
+            }else if(files_vector.at(j)[i] == 'L'){
+                string square = "";
+                square += row;
+                square += to_string(col);
+                Wlion.push_back(square);
+            }else if(files_vector.at(j)[i] == 'C'){
+                string square = "";
+                square += row;
+                square += to_string(col);
+                Wcrocodile.push_back(square);
+            }else if(files_vector.at(j)[i] == 'Z'){
+                string square = "";
+                square += row;
+                square += to_string(col);
+                Wzebra.push_back(square);
+            }else if(files_vector.at(j)[i] == 'p'){
+                string square = "";
+                square += row;
+                square += to_string(col);
+                Bpawn.push_back(square);
+            }else if(files_vector.at(j)[i] == 's'){
+                string square = "";
+                square += row;
+                square += to_string(col);
+                Bsuperpawn.push_back(square);
+            }else if(files_vector.at(j)[i] == 'g'){
+                string square = "";
+                square += row;
+                square += to_string(col);
+                Bgirafe.push_back(square);
+            }else if(files_vector.at(j)[i] == 'm'){
+                string square = "";
+                square += row;
+                square += to_string(col);
+                Bmonkey.push_back(square);
+            }else if(files_vector.at(j)[i] == 'e'){
+                string square = "";
+                square += row;
+                square += to_string(col);
+                Belephant.push_back(square);
+            }else if(files_vector.at(j)[i] == 'l'){
+                string square = "";
+                square += row;
+                square += to_string(col);
+                Blion.push_back(square);
+            }else if(files_vector.at(j)[i] == 'c'){
+                string square = "";
+                square += row;
+                square += to_string(col);
+                Bcrocodile.push_back(square);
+            }else if(files_vector.at(j)[i] == 'z'){
+                string square = "";
+                square += row;
+                square += to_string(col);
+                Bzebra.push_back(square);
+            }
+        }
+    }
+    /*Complexity Analsis :
+            // Time c is :O(n*n) nested loops,for row and cols
+            // Space c is :O(n*n) loop,adding the char loop everyrtime i loop /: not sure
+        */
+}
 void addtovector(string input,int col){
     // int player = 0;
     for(int i=0;i<7;i++){
@@ -193,6 +291,7 @@ void clearArray(){
     Blion.clear();
     Bcrocodile.clear();
     Bzebra.clear();
+    files_vector.clear();
 }
 int main(){
 
@@ -306,13 +405,28 @@ int main(){
             // Space c is :O(n) loop,adding the char loop everyrtime i loop
         */
 
-        addtovector(file7,7);
-        addtovector(file6,6);
-        addtovector(file5,5);
-        addtovector(file4,4);
-        addtovector(file3,3);
-        addtovector(file2,2);
-        addtovector(file1,1);
+
+        files_vector.push_back(file7);
+        files_vector.push_back(file6);
+        files_vector.push_back(file5);
+        files_vector.push_back(file4);
+        files_vector.push_back(file3);
+        files_vector.push_back(file2);
+        files_vector.push_back(file1);
+
+        /*for(int i=0;i<7;i++){
+            cout<<"file: "<<i<<files_vector.at(i)<<endl;
+        }*/
+
+        // addtovector(file7,7);
+        // addtovector(file6,6);
+        // addtovector(file5,5);
+        // addtovector(file4,4);
+        // addtovector(file3,3);
+        // addtovector(file2,2);
+        // addtovector(file1,1);
+
+        newadd();
         print();
         if(turn == "b"){
             cout<<"side to play: black"<<endl;
