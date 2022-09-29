@@ -4,6 +4,7 @@ using namespace std;
 
 vector<string>ranks_vector;
 vector<string>files_vector;
+vector<string>fen_vector;
 
 vector<string> Wpawn;
 vector<string> Wsuperpawn;
@@ -254,7 +255,7 @@ void print(){
     }cout<<endl;
     cout<<"black lion:";
     for(int j=0;j<Blion.size();j++){
-            cout<<" "<<Blion.at(j);
+        cout<<" "<<Blion.at(j);
     }cout<<endl;
     cout<<"white crocodile:";
     for(int j=0;j<Wcrocodile.size();j++){
@@ -293,24 +294,36 @@ void clearArray(){
     Bzebra.clear();
     files_vector.clear();
 }
+
+
 int main(){
 
-    
+    string position = "";   //represent a position
+    string turn = "";   //represent a players turn
+    string m_number = "";   //represent a number of moves
+    string split = "";   //helps to split a string
+    string fen = "";    //for current FEN
+    int index = 0;  //help with indexes
+
     //taking input
     int N;
     cin>>N;
     cin.ignore();
     for(int i=0;i<N;i++){
-
-        string position = "";   //represent a position
-        string turn = "";   //represent a players turn
-        string m_number = "";   //represent a number of moves
-        string split = "";   //helps to split a string
-
         string fen;
         getline(cin,fen);
-        // fen = "2l4/7/4z2/4c2/PP2EP1/3L2p/7 b 23";
-        int index = 0;  //help with indexes
+        fen_vector.push_back(fen);
+    }
+
+    for(int i=0;i<N;i++){
+        index = 0;
+        fen  = fen_vector.at(i);  //current fen
+
+        /*spliting input to
+        1 posiotion <position of pieces> 
+        2 turn <side to move> 
+        3 m_number <move number>
+        */
         for(auto x:fen){
             if(x == ' '){
                 // found space
@@ -337,13 +350,12 @@ int main(){
             // Space c is :O(n) loop,adding the char loop everyrtime i loop
         */
         
-        split = "";
+
+        //erase stuff and split again
+        split = ""; 
         index = 0 ;
 
-        // cout<<"Position "<<position<<endl;
-        // cout<<"Turn "<<turn<<endl;
-        // cout<<"Moves "<<m_number<<endl;
-
+        //for rows
         string file7 = "";
         string file6 = "";
         string file5 = "";
@@ -435,7 +447,12 @@ int main(){
             cout<<"side to play: white"<<endl;
         }
         clearArray();
+        
+        if(i<N-1){
+            cout<<endl;
+        }
     }
+        
     return 0;
 }
 
