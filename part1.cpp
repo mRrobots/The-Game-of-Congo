@@ -1,6 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <algorithm>
 using namespace std;
 
 vector<string>ranks_vector;
@@ -32,7 +31,7 @@ void newadd(){
         for(int j=0;j<7;j++){
             //search by ranks
             char row = (char)('a'+i);
-            int col = 7 - j;
+            int col = 7-j;
             if(files_vector.at(j)[i] == 'P'){
             string square = "";
             square += row;
@@ -211,82 +210,66 @@ void addtovector(string input,int col){
 }
 void print(){
     cout<<"white pawn:";
-    sort(Wpawn.begin(), Wpawn.end());
     for(int j=0;j<Wpawn.size();j++){
         cout<<" "<<Wpawn.at(j);
     }cout<<endl;
     cout<<"black pawn:";
-    sort(Bpawn.begin(), Bpawn.end());
     for(int j=0;j<Bpawn.size();j++){
         cout<<" "<<Bpawn.at(j);
     }cout<<endl;
     cout<<"white superpawn:";
-    sort(Wsuperpawn.begin(), Wsuperpawn.end());
     for(int j=0;j<Wsuperpawn.size();j++){
         cout<<" "<<Wsuperpawn.at(j);
     }cout<<endl;
     cout<<"black superpawn:";
-    sort(Bsuperpawn.begin(), Bsuperpawn.end());
     for(int j=0;j<Bsuperpawn.size();j++){
         cout<<" "<<Bsuperpawn.at(j);
     }cout<<endl;
     cout<<"white giraffe:";
-    sort(Wgirafe.begin(), Wgirafe.end());
     for(int j=0;j<Wgirafe.size();j++){
         cout<<" "<<Wgirafe.at(j);
     }cout<<endl;
     cout<<"black giraffe:";
-    sort(Bgirafe.begin(), Bgirafe.end());
     for(int j=0;j<Bgirafe.size();j++){
         cout<<" "<<Bgirafe.at(j);
     }cout<<endl;
     cout<<"white monkey:";
-    sort(Wmonkey.begin(), Wmonkey.end());
     for(int j=0;j<Wmonkey.size();j++){
         cout<<" "<<Wmonkey.at(j);
     }cout<<endl;
     cout<<"black monkey:";
-    sort(Bmonkey.begin(), Bmonkey.end());
     for(int j=0;j<Bmonkey.size();j++){
         cout<<" "<<Bmonkey.at(j);
     }cout<<endl;
     cout<<"white elephant:";
-    sort(Welephant.begin(), Welephant.end());
     for(int j=0;j<Welephant.size();j++){
         cout<<" "<<Welephant.at(j);
     }cout<<endl;
     cout<<"black elephant:";
-    sort(Belephant.begin(), Belephant.end());
     for(int j=0;j<Belephant.size();j++){
         cout<<" "<<Belephant.at(j);
     }cout<<endl;
     cout<<"white lion:";
-    sort(Wlion.begin(), Wlion.end());
     for(int j=0;j<Wlion.size();j++){
         cout<<" "<<Wlion.at(j);
     }cout<<endl;
     cout<<"black lion:";
-    sort(Blion.begin(), Blion.end());
     for(int j=0;j<Blion.size();j++){
         cout<<" "<<Blion.at(j);
     }cout<<endl;
     cout<<"white crocodile:";
-    sort(Wcrocodile.begin(), Wcrocodile.end());
     for(int j=0;j<Wcrocodile.size();j++){
         cout<<" "<<Wcrocodile.at(j);
     }cout<<endl;
      cout<<"black crocodile:";
-     sort(Bcrocodile.begin(), Bcrocodile.end());
     for(int j=0;j<Bcrocodile.size();j++){
         cout<<" "<<Bcrocodile.at(j);
     }cout<<endl;
      cout<<"white zebra:";
-     sort(Wzebra.begin(), Wzebra.end());
     for(int j=0;j<Wzebra.size();j++){
         cout<<" "<<Wzebra.at(j);
     }cout<<endl;
      cout<<"black zebra:";
-     sort(Bzebra.begin(), Bzebra.end());
     for(int j=0;j<Bzebra.size();j++){
         cout<<" "<<Bzebra.at(j);
     }cout<<endl;
@@ -451,20 +434,12 @@ int main(){
         files_vector.push_back(file2);
         files_vector.push_back(file1);
 
-        /*for(int i=0;i<7;i++){
-            cout<<"file: "<<i<<files_vector.at(i)<<endl;
-        }*/
+        for(int i=0;i<7;i++){
+            cout<<"file:"<<i<<" "<<files_vector.at(i)<<endl;
+        }
 
-        // addtovector(file7,7);
-        // addtovector(file6,6);
-        // addtovector(file5,5);
-        // addtovector(file4,4);
-        // addtovector(file3,3);
-        // addtovector(file2,2);
-        // addtovector(file1,1);
-
-        newadd();
-        print();
+        // newadd();
+        // print();
         if(turn == "b"){
             cout<<"side to play: black"<<endl;
         }
