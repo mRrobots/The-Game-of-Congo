@@ -110,6 +110,34 @@ class Point{
             return valid;
         
         }
+
+        
+        bool ValidG(int curr_x_move,int curr_y_move){
+            bool valid = false;
+            //board bound for ranks
+            if(curr_x_move<=6 && curr_x_move>=0){
+                //board bound for files
+                if(curr_y_move <= 6 && curr_y_move >= 0 ){
+                    if(turn == "b"){
+                        if(Files.at(6-curr_y_move)[curr_x_move] =='0'){
+                            // cout<<Files.at(6-curr_y_move)[curr_x_move]<<"x:"<<curr_x_move<<"y:"<<curr_y_move<<endl;    
+                            valid = true;   //yep valid
+                        }
+                    }
+                    //works in reverse idk why? even now, see it later
+                        //finally got it, it works with ranks not files
+                    else if(turn == "w"){
+                        if(Files.at(6-curr_y_move)[curr_x_move] =='0'){
+                            // cout<<Files.at(6-curr_y_move)[curr_x_move]<<endl;
+                            // cout<<"debug"<<Files.at(6)[3]<<endl;
+                            valid = true;   //yebo yes
+                        }
+                    }
+                }
+            }
+            return valid;
+        
+        }
         //queen type of like move
             //1 straight line
             //2 diagonal ?,didn't test this one
@@ -277,7 +305,7 @@ class Point{
         };
         
         //zebra
-        void oneTwo(){
+        void Zebra(){
 
             // cout<<"x:"<<x<<" y:"<<y<<endl;
             int curr_y = y+2;
@@ -335,9 +363,105 @@ class Point{
                 points.push_back(down);
             }
         }
+        //Geraffe
+        void onestep(){
 
+            int curr_y = y+1;
+            if(ValidG(x,curr_y)){
+                Point *down = new Point(x,curr_y,this,Files,turn);
+                points.push_back(down);
+            }
+            int curr_x = x+1;
+            if(ValidG(curr_x,y)){
+                Point *down = new Point(curr_x,y,this,Files,turn);
+                points.push_back(down);
+            }
+            if(ValidG(curr_x,curr_y)){
+                Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                points.push_back(down);
+            }
+            
+            curr_y = y-1;
+            if(ValidG(x,curr_y)){
+                Point *down = new Point(x,curr_y,this,Files,turn);
+                points.push_back(down);
+            }
+            curr_x = x-1;
+            if(ValidG(curr_x,y)){
+                Point *down = new Point(curr_x,y,this,Files,turn);
+                points.push_back(down);
+            }
+            if(ValidG(curr_x,curr_y)){
+                Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                points.push_back(down);
+            }
+
+            curr_y = y+1;
+            curr_x = x-1;
+            if(ValidG(curr_x,curr_y)){
+                Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                points.push_back(down);
+            }
+
+            curr_y = y-1;
+            curr_x = x+1;
+            if(ValidG(curr_x,curr_y)){
+                Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                points.push_back(down);
+            }
+        }
+        void Twostep(){
+            int curr_y =y+2;
+            if(ValidZ(x,curr_y)){
+                Point *down = new Point(x,curr_y,this,Files,turn);
+                points.push_back(down);
+            }
+
+            int curr_x = x+2;
+            if(ValidZ(curr_x,y)){
+                Point *down = new Point(curr_x,y,this,Files,turn);
+                points.push_back(down);
+            }
+            if(ValidZ(curr_x,curr_y)){
+                Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                points.push_back(down);
+            }
+
+            curr_x = x-2;
+            if(ValidZ(curr_x,y)){
+                Point *down = new Point(curr_x,y,this,Files,turn);
+                points.push_back(down);
+            }
+            curr_y = y-2;
+            if(ValidZ(x,curr_y)){
+                Point *down = new Point(x,curr_y,this,Files,turn);
+                points.push_back(down);
+            }
+            if(ValidZ(curr_x,curr_y)){
+                Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                points.push_back(down);
+            }
+
+            curr_x = x+2;
+            curr_y = y-2;
+            if(ValidZ(curr_x,curr_y)){
+                Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                points.push_back(down);
+            }
+            curr_x = x-2;
+            curr_y = y+2;
+            if(ValidZ(curr_x,curr_y)){
+                Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                points.push_back(down);
+            }
+        }
+
+        void GMove(){
+            onestep();
+            Twostep();
+        }
         void ZMove(){
-            oneTwo();
+            Zebra();
         }
         void KMove(){
             right();
@@ -381,13 +505,14 @@ class Congo{
                 if(Turn == "b"){
                     // j represents a row
                     string file = File.at(j);
-                    int c = file.find('z');
+                    int c = file.find('g');
                     //c represents a col
                     if(c!=-1){
 
                         Point p = Point(c,6-j,NULL,File,Turn);
                         // p.KMove();    //for king
-                        p.ZMove();  //for zebra
+                        // p.ZMove();  //for zebra
+                        p.GMove();
                         p.Print();
                     }
                     else{
@@ -396,12 +521,13 @@ class Congo{
                 }
                 else if (Turn == "w"){
                     string file = File.at(j);
-                    int c = file.find('Z');
+                    int c = file.find('G');
                     if(c!=-1){
     
                         Point p = Point(c,6-j,NULL,File,Turn);
                         // p.KMove();     
-                        p.ZMove();
+                        // p.ZMove();
+                        p.GMove();
                         p.Print();
                     }
                     else{
@@ -412,7 +538,6 @@ class Congo{
         }
 };
 
-vector<string>ranks_vector;
 vector<string>files_vector;
 vector<string>fen_vector;
 
