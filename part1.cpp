@@ -1,6 +1,297 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 using namespace std;
+
+
+
+class Point{
+    private:
+        Point *Parent;
+    public:
+        vector<string>Files;
+        vector<Point*> points;
+        int x;
+        int y;
+        string turn;
+        Point(int x_point,int y_point,Point *parent,vector<string>files,string turn){
+            this->x = x_point;
+            this->y = y_point;
+            this->Parent = parent;
+            this->Files = files;
+            this->turn = turn;
+        }
+
+        string Changer(int row,int col){
+            char row_ = (char)('a'+(row));
+            string square = "";
+            square+=row_;
+            square+=to_string(col+1);
+            return square;
+        }
+
+        void Print(){
+            vector<string>finalle;
+            for(int i=0; i<points.size() ; i++){
+                Point *c_point = points.at(i);
+                //possible square
+                string str = Changer(c_point->x,c_point->y);
+                string square = Changer(x,y);
+                //complete move
+                square+=str;
+                finalle.push_back(square);
+            }
+            sort(finalle.begin(),finalle.end());
+            for(int i=0;i<finalle.size();i++){
+                cout<<finalle.at(i);
+                if(i<finalle.size()-1){
+                    cout<<" ";
+                }
+            }
+        }
+
+        bool Valid(int curr_x_move,int curr_y_move){
+            bool valid = false;
+            if(curr_x_move<5 && curr_x_move>1){
+                if((curr_y_move<=2 && curr_y_move>=0) || (curr_y_move<=6 && curr_y_move>=4) ){
+                    if(turn == "b"){
+                        if(isupper(Files.at(curr_x_move)[6-curr_y_move]) || Files.at(curr_x_move)[6-curr_y_move] =='0'){
+                            // cout<<Files.at(curr_x_move)[6-curr_y_move]<<endl;
+                            valid = true;
+                        }
+                    }
+                    //works in reverse idk why
+                    else if(turn == "w"){
+                        if(islower(Files.at(6-curr_y_move)[curr_x_move]) || Files.at(6-curr_y_move)[curr_x_move] =='0'){
+                            // cout<<Files.at(6-curr_y_move)[curr_x_move]<<endl;
+                            // cout<<"debug"<<Files.at(6)[3]<<endl;
+                            valid = true;
+                        }
+                    }
+                }
+            }
+            return valid;
+        }
+
+        void SpeciMove(){
+            if(turn == "b"){
+                for(int i=0;i<7;i++){
+                    string file = Files.at(i);
+                    int c = file.find('L');
+                    if(c!=-1){
+                        int k_opp_x = c;
+                        int k_opp_y = 6-i;
+
+                        if(x == k_opp_x){
+                            int p = 0;
+                            for(int j = y+1;j<k_opp_y;j++){
+                                if(Files.at(x)[j]=='0'){
+                                    p++;
+                                }
+                            }
+                            if(p==0){
+                                Point *special = new Point(k_opp_x,k_opp_y,this,Files,turn);
+                                points.push_back(special);                
+                            }
+                        }
+
+                        else if((x==4 &&k_opp_x==2)&(y==4 &&k_opp_y==2)){
+                            Point *r_diagonal = new Point(k_opp_x,k_opp_y,this,Files,turn);
+                            points.push_back(r_diagonal);
+                        }
+                        else if((x==2 &&k_opp_x==4)&(y==4 &&k_opp_y==2)){
+                            Point *r_diagonal = new Point(k_opp_x,k_opp_y,this,Files,turn);
+                            points.push_back(r_diagonal);
+                        }
+                    }
+                }
+            }
+
+            else if(turn=="w"){
+                for(int i=0;i<7;i++){
+                    string file = Files.at(i);
+                    int c = file.find('l');
+                    if(c!=-1){
+                        int k_opp_x = c;
+                        int k_opp_y = 6-i;
+
+                        if(x == k_opp_x){
+                            int p = 0;
+                            for(int j = y+1;j<k_opp_y;j++){
+                                if(Files.at(x)[j]=='0'){
+                                    p++;
+                                }
+                            }
+                            if(p==0){
+                                Point *special = new Point(k_opp_x,k_opp_y,this,Files,turn);
+                                points.push_back(special);                
+                            }
+                        }
+
+                        else if((x==2 &&k_opp_x==4)&(y==2 &&k_opp_y==4)){
+                            Point *r_diagonal = new Point(k_opp_x,k_opp_y,this,Files,turn);
+                                points.push_back(r_diagonal);
+                        }
+                        else if((x==4 &&k_opp_x==2)&(y==2 &&k_opp_y==4)){
+                            Point *r_diagonal = new Point(k_opp_x,k_opp_y,this,Files,turn);
+                                points.push_back(r_diagonal);
+                        }
+                    }
+                }
+            }
+        }
+
+        void right(){
+            int curr_x = x+1;
+            if(Valid(curr_x,y)){
+                Point *right = new Point(curr_x,this->y,this,Files,turn);
+                points.push_back(right);
+            }
+        };
+        void Left(){
+            int curr_x = x-1;
+            if(Valid(curr_x,y)){
+                Point *left = new Point(curr_x,this->y,this,Files,turn);
+                points.push_back(left);
+            }
+        };
+        void Up(){
+            int curr_y = y+1;
+            if(Valid(x,curr_y)){
+                Point *up = new Point(this->x,curr_y,this,Files,turn);
+                points.push_back(up);
+            }
+        };
+        void down(){
+            int curr_y = y-1;
+            if(Valid(x,curr_y)){
+                Point *down = new Point(this->x,curr_y,this,Files,turn);
+                points.push_back(down);
+            }
+        };
+
+        void rightup(){
+            int curr_y = y+1;
+            int curr_x = x+1;
+            if(Valid(curr_x,curr_y)){
+                Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                points.push_back(down);
+            }
+        };
+
+        
+        void rightdown(){
+            int curr_y = y-1;
+            int curr_x = x+1;
+            if(Valid(curr_x,curr_y)){
+                Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                points.push_back(down);
+            }
+        };
+
+        
+        void leftup(){
+            int curr_y = y+1;
+            int curr_x = x-1;
+            if(Valid(curr_x,curr_y)){
+                Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                points.push_back(down);
+            }
+        };
+        
+        void lefttdown(){
+            int curr_y = y-1;
+            int curr_x = x-1;
+            if(Valid(curr_x,curr_y)){
+                Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                points.push_back(down);
+            }
+        };
+        void Move(){
+            right();
+            Left();
+            Up();
+            down();
+            lefttdown();
+            leftup();
+            rightdown();
+            rightup();
+            SpeciMove();
+        }
+};
+
+class Congo{
+    public:
+        string FEN;         //posiotions
+        string Turn = "";   //represent a players turn
+        string M_number = "";   //represent a number of moves
+        vector<string>File;
+
+        Congo(string fen,string turn,string m_number,vector<string>file){
+            this->FEN = fen;
+            this->Turn = turn;
+            this->M_number = m_number;
+            this->File = file;
+        }
+
+        void PrintFile(){
+            for(int i=0;i<7;i++){
+                for(int j=0;j<7;j++){
+                    cout<<File.at(i)[j]<<"_";
+                }
+                cout<<endl;
+            }
+        }
+
+        void GameRule(){
+            for(int j=0;j<7;j++){
+                if(Turn == "b"){
+                    // j represents a row
+                    string file = File.at(j);
+                    int c = file.find('l');
+                    //c represents a col
+                    if(c!=-1){
+
+                        //good
+                        /*char row = (char)('a'+(c));
+                        string square = "";
+                        square+=row;
+                        square+=to_string(7-j);
+                        cout<<square<<endl;*/
+
+                        Point p = Point(c,6-j,NULL,File,Turn);
+                        p.Move();
+                        //cout<<"original x:"<<c<<" y:"<<6-j<<endl;
+                        p.Print();
+                    }
+                    else{
+                        //Black Lion not here
+                    }        
+                }
+                else if (Turn == "w"){
+                    string file = File.at(j);
+                    int c = file.find('L');
+                    if(c!=-1){
+                        //good
+                        /*char row = (char)('a'+(c));
+                        string square = "";
+                        square+=row;
+                        square+=to_string(7-j);
+                        cout<<square<<endl;*/
+
+
+                        Point p = Point(c,6-j,NULL,File,Turn);
+                        p.Move();
+                        //cout<<"original x:"<<c<<" y:"<<6-j<<endl;
+                        p.Print();
+                    }
+                    else{
+                        // White Lion not here
+                    }
+                }
+            }
+        }
+};
 
 vector<string>ranks_vector;
 vector<string>files_vector;
@@ -31,7 +322,7 @@ void newadd(){
         for(int j=0;j<7;j++){
             //search by ranks
             char row = (char)('a'+i);
-            int col = 7-j;
+            int col = 7 - j;
             if(files_vector.at(j)[i] == 'P'){
             string square = "";
             square += row;
@@ -120,156 +411,84 @@ void newadd(){
             // Space c is :O(n*n) loop,adding the char loop everyrtime i loop /: not sure
         */
 }
-void addtovector(string input,int col){
-    // int player = 0;
-    for(int i=0;i<7;i++){
-        char row = (char)('a'+i);
-        if(input[i] == 'P'){
-            string square = "";
-            square += row;
-            square += to_string(col);
-            Wpawn.push_back(square);
-        }
-        else if(input[i] == 'S'){
-            string square = "";
-            square += row;
-            square += to_string(col);
-            Wsuperpawn.push_back(square);
-        }else if(input[i] == 'G'){
-            string square = "";
-            square += row;
-            square += to_string(col);
-            Wgirafe.push_back(square);
-        }else if(input[i] == 'M'){
-            string square = "";
-            square += row;
-            square += to_string(col);
-            Wmonkey.push_back(square);
-        }else if(input[i] == 'E'){
-            string square = "";
-            square += row;
-            square += to_string(col);
-            Welephant.push_back(square);
-        }else if(input[i] == 'L'){
-            string square = "";
-            square += row;
-            square += to_string(col);
-            Wlion.push_back(square);
-        }else if(input[i] == 'C'){
-            string square = "";
-            square += row;
-            square += to_string(col);
-            Wcrocodile.push_back(square);
-        }else if(input[i] == 'Z'){
-            string square = "";
-            square += row;
-            square += to_string(col);
-            Wzebra.push_back(square);
-        }else if(input[i] == 'p'){
-            string square = "";
-            square += row;
-            square += to_string(col);
-            Bpawn.push_back(square);
-        }else if(input[i] == 's'){
-            string square = "";
-            square += row;
-            square += to_string(col);
-            Bsuperpawn.push_back(square);
-        }else if(input[i] == 'g'){
-            string square = "";
-            square += row;
-            square += to_string(col);
-            Bgirafe.push_back(square);
-        }else if(input[i] == 'm'){
-            string square = "";
-            square += row;
-            square += to_string(col);
-            Bmonkey.push_back(square);
-        }else if(input[i] == 'e'){
-            string square = "";
-            square += row;
-            square += to_string(col);
-            Belephant.push_back(square);
-        }else if(input[i] == 'l'){
-            string square = "";
-            square += row;
-            square += to_string(col);
-            Blion.push_back(square);
-        }else if(input[i] == 'c'){
-            string square = "";
-            square += row;
-            square += to_string(col);
-            Bcrocodile.push_back(square);
-        }else if(input[i] == 'z'){
-            string square = "";
-            square += row;
-            square += to_string(col);
-            Bzebra.push_back(square);
-        }
-    }
-}
 void print(){
     cout<<"white pawn:";
+    sort(Wpawn.begin(), Wpawn.end());
     for(int j=0;j<Wpawn.size();j++){
         cout<<" "<<Wpawn.at(j);
     }cout<<endl;
     cout<<"black pawn:";
+    sort(Bpawn.begin(), Bpawn.end());
     for(int j=0;j<Bpawn.size();j++){
         cout<<" "<<Bpawn.at(j);
     }cout<<endl;
     cout<<"white superpawn:";
+    sort(Wsuperpawn.begin(), Wsuperpawn.end());
     for(int j=0;j<Wsuperpawn.size();j++){
         cout<<" "<<Wsuperpawn.at(j);
     }cout<<endl;
     cout<<"black superpawn:";
+    sort(Bsuperpawn.begin(), Bsuperpawn.end());
     for(int j=0;j<Bsuperpawn.size();j++){
         cout<<" "<<Bsuperpawn.at(j);
     }cout<<endl;
     cout<<"white giraffe:";
+    sort(Wgirafe.begin(), Wgirafe.end());
     for(int j=0;j<Wgirafe.size();j++){
         cout<<" "<<Wgirafe.at(j);
     }cout<<endl;
     cout<<"black giraffe:";
+    sort(Bgirafe.begin(), Bgirafe.end());
     for(int j=0;j<Bgirafe.size();j++){
         cout<<" "<<Bgirafe.at(j);
     }cout<<endl;
     cout<<"white monkey:";
+    sort(Wmonkey.begin(), Wmonkey.end());
     for(int j=0;j<Wmonkey.size();j++){
         cout<<" "<<Wmonkey.at(j);
     }cout<<endl;
     cout<<"black monkey:";
+    sort(Bmonkey.begin(), Bmonkey.end());
     for(int j=0;j<Bmonkey.size();j++){
         cout<<" "<<Bmonkey.at(j);
     }cout<<endl;
     cout<<"white elephant:";
+    sort(Welephant.begin(), Welephant.end());
     for(int j=0;j<Welephant.size();j++){
         cout<<" "<<Welephant.at(j);
     }cout<<endl;
     cout<<"black elephant:";
+    sort(Belephant.begin(), Belephant.end());
     for(int j=0;j<Belephant.size();j++){
         cout<<" "<<Belephant.at(j);
     }cout<<endl;
     cout<<"white lion:";
+    sort(Wlion.begin(), Wlion.end());
     for(int j=0;j<Wlion.size();j++){
         cout<<" "<<Wlion.at(j);
     }cout<<endl;
     cout<<"black lion:";
+    sort(Blion.begin(), Blion.end());
     for(int j=0;j<Blion.size();j++){
         cout<<" "<<Blion.at(j);
     }cout<<endl;
     cout<<"white crocodile:";
+    sort(Wcrocodile.begin(), Wcrocodile.end());
     for(int j=0;j<Wcrocodile.size();j++){
         cout<<" "<<Wcrocodile.at(j);
     }cout<<endl;
      cout<<"black crocodile:";
+     sort(Bcrocodile.begin(), Bcrocodile.end());
     for(int j=0;j<Bcrocodile.size();j++){
         cout<<" "<<Bcrocodile.at(j);
     }cout<<endl;
      cout<<"white zebra:";
+     sort(Wzebra.begin(), Wzebra.end());
     for(int j=0;j<Wzebra.size();j++){
         cout<<" "<<Wzebra.at(j);
     }cout<<endl;
      cout<<"black zebra:";
+     sort(Bzebra.begin(), Bzebra.end());
     for(int j=0;j<Bzebra.size();j++){
         cout<<" "<<Bzebra.at(j);
     }cout<<endl;
@@ -299,7 +518,6 @@ void clearArray(){
 
 
 int main(){
-
     string position = "";   //represent a position
     string turn = "";   //represent a players turn
     string m_number = "";   //represent a number of moves
@@ -434,19 +652,26 @@ int main(){
         files_vector.push_back(file2);
         files_vector.push_back(file1);
 
-        for(int i=0;i<7;i++){
-            cout<<"file:"<<i<<" "<<files_vector.at(i)<<endl;
-        }
+        Congo congo = Congo(fen,turn,m_number,files_vector);
+        // congo.PrintFile();
+        congo.GameRule();
+        
+        // int s = file7.find('L');
+        // cout<<s<<endl;
 
-        // newadd();
-        // print();
-        if(turn == "b"){
-            cout<<"side to play: black"<<endl;
-        }
-        else{
-            cout<<"side to play: white"<<endl;
-        }
+
+        /*for(int j=0;j<7;j++){
+            // cout<<"file:"<<i<<" "<<files_vector.at(i)<<endl;
+            for(int k=0;k<7;k++){
+                // cout<<files_vector.at(j)[k]<<"_";
+            }
+            cout<<endl;
+        }*/
+
+        newadd();
+
         clearArray();
+
         file7 = "";
         file6 = "";
         file5 = "";
@@ -463,9 +688,9 @@ int main(){
 
         index = 0;  //help with indexes
         
-        // if(i<N-1){
+        if(i<N-1){
             cout<<endl;
-        // }
+        }
     }
         
     return 0;
