@@ -33,9 +33,10 @@ class Point{
             return square;
         }
 
-        void Print(){
+        vector<string> Print(){
             //for final output
             vector<string>finalle;
+
             for(int i=0; i<points.size() ; i++){
                 Point *c_point = points.at(i);
                 //possible square
@@ -48,13 +49,14 @@ class Point{
 
             //printing it nicely
             sort(finalle.begin(),finalle.end());
-            for(int i=0;i<finalle.size();i++){
-                cout<<finalle.at(i);
-                //some nice printing
-                if(i<finalle.size()-1){
-                    cout<<" ";
-                }
-            }
+            return finalle;
+            // for(int i=0;i<finalle.size();i++){
+            //     cout<<finalle.at(i);
+            //     //some nice printing
+            //     if(i<finalle.size()-1){
+            //         cout<<" ";
+            //     }
+            // }
         }
 
         //evalute if move is valid
@@ -141,23 +143,16 @@ class Point{
         
         bool ValidP(int curr_x_move,int curr_y_move){
             bool valid = false;
-            //board bound for ranks
             if(curr_x_move<=6 && curr_x_move>=0){
-                //board bound for files
                 if(curr_y_move <= 6 && curr_y_move >= 0 ){
                     if(turn == "b"){
-                        if(isupper(Files.at(6-curr_y_move)[curr_x_move]) || Files.at(6-curr_y_move)[curr_x_move] =='0'){
-                            // cout<<Files.at(6-curr_y_move)[curr_x_move]<<"x:"<<curr_x_move<<"y:"<<curr_y_move<<endl;    
-                            valid = true;   //yep valid
+                        if(isupper(Files.at(6-curr_y_move)[curr_x_move]) || Files.at(6-curr_y_move)[curr_x_move] =='0'){    
+                            valid = true;
                         }
                     }
-                    //works in reverse idk why? even now, see it later
-                        //finally got it, it works with ranks not files
                     else if(turn == "w"){
                         if(islower(Files.at(6-curr_y_move)[curr_x_move]) || Files.at(6-curr_y_move)[curr_x_move] =='0'){
-                            // cout<<Files.at(6-curr_y_move)[curr_x_move]<<endl;
-                            // cout<<"debug"<<Files.at(6)[3]<<endl;
-                            valid = true;   //yebo yes
+                            valid = true;
                         }
                     }
                 }
@@ -168,23 +163,16 @@ class Point{
 
         bool ValidPr(int curr_x_move,int curr_y_move){
             bool valid = false;
-            //board bound for ranks
             if(curr_x_move<=6 && curr_x_move>=0){
-                //board bound for files
                 if(curr_y_move <= 6 && curr_y_move >= 0 ){
                     if(turn == "b"){
-                        if(Files.at(6-curr_y_move)[curr_x_move] =='0'){
-                            // cout<<Files.at(6-curr_y_move)[curr_x_move]<<"x:"<<curr_x_move<<"y:"<<curr_y_move<<endl;    
-                            valid = true;   //yep valid
+                        if(Files.at(6-curr_y_move)[curr_x_move] =='0'){   
+                            valid = true;
                         }
                     }
-                    //works in reverse idk why? even now, see it later
-                        //finally got it, it works with ranks not files
                     else if(turn == "w"){
                         if(Files.at(6-curr_y_move)[curr_x_move] =='0'){
-                            // cout<<Files.at(6-curr_y_move)[curr_x_move]<<endl;
-                            // cout<<"debug"<<Files.at(6)[3]<<endl;
-                            valid = true;   //yebo yes
+                            valid = true;  
                         }
                     }
                 }
@@ -560,13 +548,15 @@ class Point{
             if(turn == "w"){
                 if(y>3){
                     int curr_y = y-1;
+                    int possible = 0;
                     if(ValidPr(x,curr_y)){
+                        possible++;
                         Point *down = new Point(x,curr_y,this,Files,turn);
                         points.push_back(down);
                     }
 
                     curr_y = y-2;
-                    if(ValidPr(x,curr_y)){
+                    if(ValidPr(x,curr_y) && possible == 1){
                         Point *down = new Point(x,curr_y,this,Files,turn);
                         points.push_back(down);
                     }
@@ -576,13 +566,15 @@ class Point{
             else if(turn == "b"){
                 if(y<3){
                     int curr_y = y+1;
+                    int possible = 0;
                     if(ValidPr(x,curr_y)){
+                        possible++;
                         Point *down = new Point(x,curr_y,this,Files,turn);
                         points.push_back(down);
                     }
 
                     curr_y = y+2;
-                    if(ValidPr(x,curr_y)){
+                    if(ValidPr(x,curr_y) && possible == 1){
                         Point *down = new Point(x,curr_y,this,Files,turn);
                         points.push_back(down);
                     }
@@ -640,6 +632,7 @@ class Congo{
 
         void GameRule(){
 
+            vector<string> output;
             for(int j=0;j<7;j++){
                 if(Turn == "b"){
                     // j represents a row
@@ -647,33 +640,55 @@ class Congo{
                     int c = file.find('p');
                     //c represents a col
                     if(c!=-1){
-
+                        vector<string> fetch;
                         Point p = Point(c,6-j,NULL,File,Turn);
                         // p.KMove();    //for king
                         // p.ZMove();  //for zebra
                         // p.GMove();
                         p.PMove();
-                        p.Print();
+                        fetch = p.Print();
+                        // cout<<fetch.at(0);
+                        
+                        for(string str:fetch){
+                            output.push_back(str);
+                        }
+
                     }
                     else{
                         //Black Lion not here
                     }        
                 }
                 else if (Turn == "w"){
+                    
                     string file = File.at(j);
                     int c = file.find('P');
                     if(c!=-1){
-    
+
+                        vector<string> fetch;
                         Point p = Point(c,6-j,NULL,File,Turn);
                         // p.KMove();     
                         // p.ZMove();
                         // p.GMove();
                         p.PMove();
-                        p.Print();
+                        fetch = p.Print();
+                    
+                        for(string str:fetch){
+                            output.push_back(str);
+                        }
                     }
                     else{
                         // White Lion not here
                     }
+                }
+            }
+
+             sort(output.begin(),output.end());
+            // return finalle;
+            for(int i=0;i<output.size();i++){
+                cout<<output.at(i);
+                //some nice printing
+                if(i<output.size()-1){
+                    cout<<" ";
                 }
             }
         }
