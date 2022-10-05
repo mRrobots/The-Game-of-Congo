@@ -461,91 +461,172 @@ class Point{
             }
         }
         //pawn move
-        void Briver(){
+        void SBriver(){
             if(turn == "w"){
+                //go up
                 int curr_y = y+1;
                 //check validity
                 if(ValidP(x,curr_y)){
                     Point *down = new Point(x,curr_y,this,Files,turn);
                     points.push_back(down);
                 }
+                //go up right
                 int curr_x = x+1;
                 //check validity
                 if(ValidP(curr_x,curr_y)){
                     Point *down = new Point(curr_x,curr_y,this,Files,turn);
                     points.push_back(down);
                 }
+                //go right only
+                if(ValidP(curr_x,y)){
+                    Point *down = new Point(curr_x,y,this,Files,turn);
+                    points.push_back(down);
+                }
+                //go up left
                 curr_x = x-1;
                 //check validity
                 if(ValidP(curr_x,curr_y)){
                     Point *down = new Point(curr_x,curr_y,this,Files,turn);
                     points.push_back(down);
                 }
+                //go left only
+                if(ValidP(curr_x,y)){
+                    Point *down = new Point(curr_x,y,this,Files,turn);
+                    points.push_back(down);
+                }
             }
 
             else if(turn == "b"){
+                //go down
                 int curr_y = y-1;
-                //check validity
                 if(ValidP(x,curr_y)){
                     Point *down = new Point(x,curr_y,this,Files,turn);
                     points.push_back(down);
                 }
+                //go right down
                 int curr_x = x+1;
-                //check validity
                 if(ValidP(curr_x,curr_y)){
                     Point *down = new Point(curr_x,curr_y,this,Files,turn);
                     points.push_back(down);
                 }
+                //just down
+                if(ValidP(curr_x,y)){
+                    Point *down = new Point(curr_x,y,this,Files,turn);
+                    points.push_back(down);
+                }
+                //go down left down
                 curr_x = x-1;
                 //check validity
                 if(ValidP(curr_x,curr_y)){
                     Point *down = new Point(curr_x,curr_y,this,Files,turn);
                     points.push_back(down);
                 }
+                //just left
+                if(ValidP(curr_x,y)){
+                    Point *down = new Point(curr_x,y,this,Files,turn);
+                    points.push_back(down);
+                }
             }
         }
 
-        void Ariver(){
+        void SAriver(){
             if(turn == "w"){
-                if(y>3){
+                // if(y>3){
+                    //retreate one square straight
                     int curr_y = y-1;
-                    int possible = 0;
+                    int possible_y = 0;
                     if(ValidPr(x,curr_y)){
-                        possible++;
+                        possible_y++;
                         Point *down = new Point(x,curr_y,this,Files,turn);
                         points.push_back(down);
                     }
-
+                    //retreate one square diagonal left
+                    int curr_x = x-1;
+                    int possible_x_l = 0;
+                    if(ValidPr(curr_x,curr_y)){
+                        possible_x_l++;
+                        Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                        points.push_back(down);
+                    }
+                    //retreate one square diagonal rigt
+                    curr_x = x+1;
+                    int possible_x_r = 0;
+                    if(ValidPr(curr_x,curr_y)){
+                        possible_x_r++;
+                        Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                        points.push_back(down);
+                    }
+                    //retreate two square back
                     curr_y = y-2;
-                    if(ValidPr(x,curr_y) && possible == 1){
+                    if(ValidPr(x,curr_y) && possible_y == 1){
                         Point *down = new Point(x,curr_y,this,Files,turn);
                         points.push_back(down);
                     }
-                }
+                    //retreate two square diagonal left
+                    curr_x = x-2;
+                    if(ValidPr(curr_x,curr_y) && possible_x_l == 1){
+                        Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                        points.push_back(down);
+                    }
+                    //retreate two square diagonal rigth
+                    curr_x = x+2;
+                    if(ValidPr(curr_x,curr_y) && possible_x_r == 1){
+                        Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                        points.push_back(down);
+                    }
+                // }
             }
 
             else if(turn == "b"){
-                if(y<3){
+                // if(y<3){
                     int curr_y = y+1;
-                    int possible = 0;
+                    int possible_y = 0;
                     if(ValidPr(x,curr_y)){
-                        possible++;
+                        possible_y++;
                         Point *down = new Point(x,curr_y,this,Files,turn);
                         points.push_back(down);
                     }
-
+                    //retreate one square diagonal left
+                    int curr_x = x-1;
+                    int possible_x_l = 0;
+                    if(ValidPr(curr_x,curr_y)){
+                        possible_x_l++;
+                        Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                        points.push_back(down);
+                    }
+                    //retreate one square diagonal rigt
+                    curr_x = x+1;
+                    int possible_x_r = 0;
+                    if(ValidPr(curr_x,curr_y)){
+                        possible_x_r++;
+                        Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                        points.push_back(down);
+                    }
+                    //retreate two square back
                     curr_y = y+2;
-                    if(ValidPr(x,curr_y) && possible == 1){
+                    if(ValidPr(x,curr_y) && possible_y == 1){
                         Point *down = new Point(x,curr_y,this,Files,turn);
                         points.push_back(down);
                     }
-                }
+                    //retreate two square diagonal left
+                    curr_x = x-2;
+                    if(ValidPr(curr_x,curr_y) && possible_x_l == 1){
+                        Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                        points.push_back(down);
+                    }
+                    //retreate two square diagonal rigth
+                    curr_x = x+2;
+                    if(ValidPr(curr_x,curr_y) && possible_x_r == 1){
+                        Point *down = new Point(curr_x,curr_y,this,Files,turn);
+                        points.push_back(down);
+                    }
+                // }
             }
         }
 
-        void PMove(){
-            Briver();
-            Ariver();
+        void SPMove(){
+            SBriver();
+            SAriver();
         }
         void GMove(){
             onestep();
@@ -597,13 +678,14 @@ class Congo{
                     // j represents a row
                     string file = File.at(j);
                     for (int i=0;i<file.size();i++){
-                        if(file[i] == 'p'){
+                        if(file[i] == 's'){
                             vector<string> fetch;
                             Point p = Point(i,6-j,NULL,File,Turn);
                             // p.KMove();     
                             // p.ZMove();
                             // p.GMove();
-                            p.PMove();
+                            // p.PMove();
+                            p.SPMove();
                             fetch = p.Print();
                             
                             for(string str:fetch){
@@ -617,13 +699,14 @@ class Congo{
                     string file = File.at(j);
                     //this loops only once,got it
                     for (int i=0;i<file.size();i++){
-                        if(file[i] == 'P'){
+                        if(file[i] == 'S'){
                             vector<string> fetch;
                             Point p = Point(i,6-j,NULL,File,Turn);
                             // p.KMove();     
                             // p.ZMove();
                             // p.GMove();
-                            p.PMove();
+                            // p.PMove();
+                            p.SPMove();
                             fetch = p.Print();
                             
                             for(string str:fetch){
