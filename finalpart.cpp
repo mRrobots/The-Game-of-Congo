@@ -764,14 +764,14 @@ class Congo{
                     // j represents a row
                     string file = File.at(j);
                     for (int i=0;i<file.size();i++){
-                        if(file[i] == 'S'){
+                        if(file[i] == 'p'){
                             vector<string> fetch;
                             Point p = Point(i,6-j,NULL,File,Turn);
                             // p.KMove();     
                             // p.ZMove();
                             // p.GMove();
-                            // p.PMove();
-                            p.SPMove();
+                            p.PMove();
+                            // p.SPMove();
                             fetch = p.Print();
                             
                             for(string str:fetch){
@@ -785,14 +785,14 @@ class Congo{
                     string file = File.at(j);
                     //this loops only once,got it
                     for (int i=0;i<file.size();i++){
-                        if(file[i] == 'S'){
+                        if(file[i] == 'P'){
                             vector<string> fetch;
                             Point p = Point(i,6-j,NULL,File,Turn);
                             // p.KMove();     
                             // p.ZMove();
                             // p.GMove();
-                            // p.PMove();
-                            p.SPMove();
+                            p.PMove();
+                            // p.SPMove();
                             fetch = p.Print();
                             
                             for(string str:fetch){
