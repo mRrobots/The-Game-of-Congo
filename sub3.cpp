@@ -737,16 +737,20 @@ class Congo{
     public:
         string FEN;         //posiotions
         string Turn = "";   //represent a players turn
-        string M_number = "";   //represent a number of moves
-        vector<string>File;
+        int M_number;   //represent a number of moves
+        string Move = "";   //move to be played
+        vector<string>File; //represent a board
 
-        Congo(string fen,string turn,string m_number,vector<string>file){
+
+        Congo(string fen,string turn,int m_number,vector<string>file ,string move){
             this->FEN = fen;
             this->Turn = turn;
             this->M_number = m_number;
             this->File = file;
+            this->Move = move;
         }
 
+        //Print Board
         void PrintFile(){
             for(int i=0;i<7;i++){
                 for(int j=0;j<7;j++){
@@ -756,8 +760,171 @@ class Congo{
             }
         }
 
-        void GameRule(){
+        void Execute(){
+            vector<int> P_in_river_before;
+            vector<char> P;
+            //remember row->col
+            // cout<<Move<<endl;
+            //from
+            int x_from = int(Move[0]) -97;
+            int y_from = Move[1]-'0';
+            y_from = 7-y_from ;
+            //to
+            int x_to = int(Move[2]) -97;
+            int y_to = Move[3]-'0';
+            y_to = 7- y_to;
+            // move the peice and put a new one
+            // cout<<"From river"<<endl;
+            // cout<<File.at(3)<<endl;
+            Piece_in_River_before(P_in_river_before);
+            // cout<<"From river"<<endl;
+            for(int i=0;i<P_in_river_before.size();i++){
+                // cout<<"From river"<<endl;
+                P.push_back(File.at(3)[P_in_river_before.at(i)]);
+                // cout<<(File.at(3)[P_in_river_before.at(i)])<<endl;
+            }
+            // for(int i=0;i<P.size();i++){
+            //     cout<<P.at(i)<<endl;
+            // }
+            From_To(x_from,y_from,x_to,y_to);
+            // Piece_in_River_before(P_in_river_after);
+            for(int i=0;i<P_in_river_before.size();i++){
+                // cout<<"After river"<<endl;
+                // cout<<(File.at(3)[P_in_river_before.at(i)])<<endl;
+                // cout<<P.at(i);
 
+                string file = File.at(3);
+                int c = file.find(P.at(i)); 
+                if(c!=-1){
+                    this->File.at(3)[c] = '0';
+                }
+                // if( File.at(3)[P_in_river_before.at(i)] == P.at(i) ){
+                //     this->File.at(3)[P_in_river_before.at(i)] = '0';
+                // }
+            }
+
+            Move_counter();
+
+            string state = State();
+
+            Side_to_play();
+
+            this->FEN =  To_fen();
+
+            cout<<FEN<<" "<<Turn<<" "<<M_number<<endl;
+            cout<<state;
+
+            // PrintFile();
+        
+        }
+
+        string State(){
+            string state = "Continue";
+            if(Turn == "w"){
+                bool black = true;
+                for(int i=0;i<3;i++){
+                    string file = File.at(i);
+                    int c = file.find('l');
+                    if(c!=-1){
+                        return state;
+                    }
+                    else{
+                        black = false;
+                    }
+
+                }
+                if(!black){
+                    return  "White wins";
+                }
+            }
+            else if(Turn == "b"){
+                bool white = true;
+                for(int i=4;i<7;i++){
+                    string file = File.at(i);
+                    int c = file.find('L');
+                    if(c!=-1){
+                        return state;
+                    }
+                    else{
+                        white = false;
+                    }
+
+                }
+                if(!white){
+                    return  "Black wins";
+                }
+            }
+            return state;
+        }
+
+        void Piece_in_River_before(vector<int>& P_in_river){
+            for(int i=0;i<7;i++){
+                if(Turn=="w"){
+                    if(isupper(File.at(3)[i])){
+                        P_in_river.push_back(i);
+                    }
+                }
+                else{
+                    if(islower(File.at(3)[i])){
+                        P_in_river.push_back(i);
+                    }
+                }
+            }
+        }
+
+        void Side_to_play(){
+            if(Turn=="b"){
+                this->Turn = "w";
+            }
+            else{
+                this->Turn = "b";
+            }
+        }
+
+        void Move_counter(){
+            if(Turn=="b"){
+                this->M_number++;
+            }
+        }
+
+        void From_To(int x1,int y1,int x2,int y2){
+            this->File.at(y2)[x2] = File.at(y1)[x1];
+            this->File.at(y1)[x1] = '0';
+        }
+
+        string To_fen(){
+            string fen = "";
+            for(int i=0;i<7;i++){
+                string file = File.at(i);
+                int k = 0;
+                for(int j=0;j<7;j++){
+                    if(file[j]=='0'){
+                        k++;
+                    }
+                    else if(isalpha(file[j])){
+                        if(k!=0){
+                            fen+=to_string(k);
+                            k=0;
+                        }
+                        fen += file[j];
+                    }
+                    if(j+1>6){
+                        if(k!=0){
+                            fen+=to_string(k);
+                            k=0;
+                        }
+                    }
+                    if(j==6 && i!=6){
+                        fen+="/";
+                    }
+                }
+            }
+            
+            // cout<<fen<<endl;
+            return fen;
+        }
+        // Possible moves
+        void GameRule(){
             vector<string> output;
             for(int j=0;j<7;j++){
                 if(Turn == "b"){
@@ -816,11 +983,12 @@ class Congo{
 
 vector<string>files_vector;
 vector<string>fen_vector;
+vector<string>moves_vector;
 
 void clearArray(){
     files_vector.clear();
+    // moves_vector.clear();
 }
-
 
 int main(){
     string position = "";   //represent a position
@@ -828,6 +996,7 @@ int main(){
     string m_number = "";   //represent a number of moves
     string split = "";   //helps to split a string
     string fen = "";    //for current FEN
+    string move = "";
 
     int index = 0;  //help with indexes
 
@@ -844,15 +1013,41 @@ int main(){
     int N;
     cin>>N;
     cin.ignore();
-    for(int i=0;i<N;i++){
-        string fen;
-        getline(cin,fen);
-        fen_vector.push_back(fen);
+    for(int i=0;i<N*2;i++){
+        if(i%2!=0){
+            string move;
+            getline(cin,move);
+            moves_vector.push_back(move);
+        }
+        else{
+            string fen;
+            getline(cin,fen);
+            fen_vector.push_back(fen);
+        }
     }
 
     for(int i=0;i<N;i++){
-        // index = 0;
         fen  = fen_vector.at(i);  //current fen
+        move = moves_vector.at(i);  //current  move
+        // cout<<"fen:"<<fen<<endl;
+        // cout<<"move:"<<move<<endl;
+        // cout<<"\n";
+
+
+        //changin back the string
+        // cout<<"file:"<<move[0]<<endl;
+        // int x_from = int(move[0]) -97;
+        // int y_from = move[1]-'0';
+        // cout<<x_from;
+        // cout<<":"<<y_from<<endl;
+
+        // int x_to = int(move[2]) -97;
+        // int y_to = move[3]-'0';
+        // cout<<x_to;
+        // cout<<":"<<y_to<<endl;
+
+
+
 
         /*spliting input to
         1 posiotion <position of pieces> 
@@ -952,9 +1147,11 @@ int main(){
         files_vector.push_back(file2);
         files_vector.push_back(file1);
 
-        Congo congo = Congo(fen,turn,m_number,files_vector);
+        int m_number_int =stoi(m_number);
+        Congo congo = Congo(fen,turn,m_number_int,files_vector,move);
         // congo.PrintFile();
-        congo.GameRule();
+        // congo.GameRule();
+        congo.Execute();
         
         clearArray();
 
