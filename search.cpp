@@ -754,16 +754,91 @@ class Congo{
         void PrintFile(){
             for(int i=0;i<7;i++){
                 for(int j=0;j<7;j++){
-                    cout<<File.at(i)[j]<<"_";
+                    cout<<File.at(i)[j]<<" ";
                 }
                 cout<<endl;
             }
         }
 
+        int Bvalue(){
+            int score = 0;
+            for(int i=0;i<FEN.size();i++){
+                if(FEN[i] == 'p'){
+                    score += 100;
+                }
+                else if(FEN[i] == 'z'){
+                    score += 300;
+                }
+                else if(FEN[i] == 's'){
+                    score += 350;
+                }
+                else if(FEN[i] == 'g'){
+                    score += 400;
+                }
+            }
+            return score;
+        }
+
+        int Wvalue(){
+            int score = 0;
+            for(int i=0;i<FEN.size();i++){
+                if(FEN[i] == 'P'){
+                    score += 100;
+                }
+                else if(FEN[i] == 'Z'){
+                    score += 300;
+                }
+                else if(FEN[i] == 'S'){
+                    score += 350;
+                }
+                else if(FEN[i] == 'G'){
+                    score += 400;
+                }
+            }
+            return score;
+        }
+
+        int Evaluate(){
+            int blackking = FEN.find('l');
+            int whiteking = FEN.find('L');
+
+            if(blackking == -1){
+                // cout<<10000;
+                return 10000;
+            }
+            
+            else if(whiteking == -1){
+                // cout<<-10000;
+                return -10000;
+            }
+
+            
+            int wscore = Wvalue();
+            int bscore = Bvalue();
+            
+            int finalscore = wscore - bscore;
+            if(finalscore == 0 ){
+                // cout<<0;
+                return 0;
+            }
+            else{
+                if(Turn == "b"){
+                    finalscore = finalscore*-1;
+                }
+                // cout<<finalscore;
+                return finalscore;
+            }
+        }
+
+        void Score(){
+            cout<<Evaluate();
+        }
+
         void Execute(){
             vector<int> P_in_river_before;
             vector<char> P;
-           
+            //remember row->col
+            // cout<<Move<<endl;
             //from
             int x_from = int(Move[0]) -97;
             int y_from = Move[1]-'0';
@@ -773,32 +848,33 @@ class Congo{
             int y_to = Move[3]-'0';
             y_to = 7- y_to;
             // move the peice and put a new one
-
-            //pieces in the river in coordinate
+            // cout<<"From river"<<endl;
+            // cout<<File.at(3)<<endl;
             Piece_in_River_before(P_in_river_before);
-
+            // cout<<"From river"<<endl;
             for(int i=0;i<P_in_river_before.size();i++){
+                // cout<<"From river"<<endl;
                 P.push_back(File.at(3)[P_in_river_before.at(i)]);
+                // cout<<(File.at(3)[P_in_river_before.at(i)])<<endl;
             }
-
-            //move the piece from_to :/
+            // for(int i=0;i<P.size();i++){
+            //     cout<<P.at(i)<<endl;
+            // }
             From_To(x_from,y_from,x_to,y_to);
-
-            /*remove piece in river that didn't not move
-               2 cases: 
-                1.moved
-                2.haven't moved
-            good luck :/ */
+            // Piece_in_River_before(P_in_river_after);
             for(int i=0;i<P_in_river_before.size();i++){
+                // cout<<"After river"<<endl;
+                // cout<<(File.at(3)[P_in_river_before.at(i)])<<endl;
+                // cout<<P.at(i);
+
                 string file = File.at(3);
-                //still here,haven't moved (x,y)
-                if(P.at(i) == file[P_in_river_before.at(i)]){
-                    this->File.at(3)[P_in_river_before.at(i)] = '0';
+                int c = file.find(P.at(i)); 
+                if(c!=-1){
+                    this->File.at(3)[c] = '0';
                 }
-                //moved but same still on the river
-                else if(y_to - y_from == 0 ){
-                    this->File.at(3)[x_to] = '0';
-                }
+                // if( File.at(3)[P_in_river_before.at(i)] == P.at(i) ){
+                //     this->File.at(3)[P_in_river_before.at(i)] = '0';
+                // }
             }
 
             Move_counter();
@@ -856,14 +932,13 @@ class Congo{
         }
 
         void Piece_in_River_before(vector<int>& P_in_river){
-            //storee the coordiante
             for(int i=0;i<7;i++){
                 if(Turn=="w"){
                     if(isupper(File.at(3)[i])){
                         P_in_river.push_back(i);
                     }
                 }
-                else if(Turn == "b"){
+                else{
                     if(islower(File.at(3)[i])){
                         P_in_river.push_back(i);
                     }
@@ -887,22 +962,7 @@ class Congo{
         }
 
         void From_To(int x1,int y1,int x2,int y2){
-            
-            char from = File.at(y1)[x1];
-            // cout<<from<<endl;
-            // cout<<x1<<":"<<x2<<" "<<y1<<":"<<y2<<endl;
-            if(Turn == "b"){
-                if(y1 == 5 && this->File.at(y1)[x1]=='p' && y2 == 6){
-                    from = 's';
-                }
-            }
-
-            if(Turn =="w"){
-                if(y1 == 1 && this->File.at(y1)[x1]=='P' && y2 == 0){
-                    from = 'S';
-                }
-            }
-            this->File.at(y2)[x2] = from;
+            this->File.at(y2)[x2] = File.at(y1)[x1];
             this->File.at(y1)[x1] = '0';
         }
 
@@ -951,7 +1011,7 @@ class Congo{
                             // p.KMove();     
                             // p.ZMove();
                             // p.GMove();
-                            p.PMove();
+                            // p.PMove();
                             // p.SPMove();
                             fetch = p.Print();
                             
@@ -972,7 +1032,7 @@ class Congo{
                             // p.KMove();     
                             // p.ZMove();
                             // p.GMove();
-                            p.PMove();
+                            // p.PMove();
                             // p.SPMove();
                             fetch = p.Print();
                             
@@ -987,7 +1047,7 @@ class Congo{
             sort(output.begin(),output.end());
             for(int i=0;i<output.size();i++){
                 cout<<output.at(i);
-                //some nice printing
+                //some nice printing 
                 if(i<output.size()-1){
                     cout<<" ";
                 }
@@ -1027,41 +1087,22 @@ int main(){
     int N;
     cin>>N;
     cin.ignore();
-    for(int i=0;i<N*2;i++){
-        if(i%2!=0){
-            string move;
-            getline(cin,move);
-            moves_vector.push_back(move);
-        }
-        else{
+    for(int i=0;i<N;i++){
+        // if(i%2!=0){
+        //     string move;
+        //     getline(cin,move);
+        //     moves_vector.push_back(move);
+        // }
+        // else{
             string fen;
             getline(cin,fen);
             fen_vector.push_back(fen);
-        }
+        // }
     }
 
     for(int i=0;i<N;i++){
         fen  = fen_vector.at(i);  //current fen
-        move = moves_vector.at(i);  //current  move
-        // cout<<"fen:"<<fen<<endl;
-        // cout<<"move:"<<move<<endl;
-        // cout<<"\n";
-
-
-        //changin back the string
-        // cout<<"file:"<<move[0]<<endl;
-        // int x_from = int(move[0]) -97;
-        // int y_from = move[1]-'0';
-        // cout<<x_from;
-        // cout<<":"<<y_from<<endl;
-
-        // int x_to = int(move[2]) -97;
-        // int y_to = move[3]-'0';
-        // cout<<x_to;
-        // cout<<":"<<y_to<<endl;
-
-
-
+        move =""; /*moves_vector.at(i);  //current  move*/
 
         /*spliting input to
         1 posiotion <position of pieces> 
@@ -1165,7 +1206,8 @@ int main(){
         Congo congo = Congo(fen,turn,m_number_int,files_vector,move);
         // congo.PrintFile();
         // congo.GameRule();
-        congo.Execute();
+        // congo.Execute();
+        congo.Score();
         
         clearArray();
 

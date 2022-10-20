@@ -30,6 +30,7 @@
   ],
   "files.associations": {
     "ostream": "cpp",
-    "iostream": "cpp"
+    "iostream": "cpp",
+    "*.tcc": "cpp"
   }
 }
