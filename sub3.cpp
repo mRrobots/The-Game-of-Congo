@@ -749,7 +749,6 @@ class Congo{
             this->File = file;
             this->Move = move;
         }
-
         //Print Board
         void PrintFile(){
             for(int i=0;i<7;i++){
@@ -763,7 +762,6 @@ class Congo{
         void Execute(){
             vector<int> P_in_river_before;
             vector<char> P;
-           
             //from
             int x_from = int(Move[0]) -97;
             int y_from = Move[1]-'0';
@@ -772,48 +770,38 @@ class Congo{
             int x_to = int(Move[2]) -97;
             int y_to = Move[3]-'0';
             y_to = 7- y_to;
-            // move the peice and put a new one
-
             //pieces in the river in coordinate
             Piece_in_River_before(P_in_river_before);
-
+            //store the piece
             for(int i=0;i<P_in_river_before.size();i++){
                 P.push_back(File.at(3)[P_in_river_before.at(i)]);
             }
-
             //move the piece from_to :/
             From_To(x_from,y_from,x_to,y_to);
-
-            /*remove piece in river that didn't not move
+            /*remove piece in river
                2 cases: 
                 1.moved
                 2.haven't moved
             good luck :/ */
             for(int i=0;i<P_in_river_before.size();i++){
                 string file = File.at(3);
-                //still here,haven't moved (x,y)
+                //still here,haven't moved (x,y) 1 case 
                 if(P.at(i) == file[P_in_river_before.at(i)]){
                     this->File.at(3)[P_in_river_before.at(i)] = '0';
                 }
-                //moved but same still on the river
+                //moved but same still on the river(3,y) 2nd case
                 else if(y_to - y_from == 0 ){
                     this->File.at(3)[x_to] = '0';
                 }
             }
-
+            //other stuff
             Move_counter();
-
             string state = State();
-
             Side_to_play();
-
             this->FEN =  To_fen();
-
             cout<<FEN<<" "<<Turn<<" "<<M_number<<endl;
             cout<<state;
-
             // PrintFile();
-        
         }
 
         string State(){
@@ -887,17 +875,16 @@ class Congo{
         }
 
         void From_To(int x1,int y1,int x2,int y2){
-            
+
             char from = File.at(y1)[x1];
-            // cout<<from<<endl;
-            // cout<<x1<<":"<<x2<<" "<<y1<<":"<<y2<<endl;
+            //super pawn stuff for black
             if(Turn == "b"){
                 if(y1 == 5 && this->File.at(y1)[x1]=='p' && y2 == 6){
                     from = 's';
                 }
             }
-
-            if(Turn =="w"){
+            //super pawn stuff for white
+            if(Turn == "w"){
                 if(y1 == 1 && this->File.at(y1)[x1]=='P' && y2 == 0){
                     from = 'S';
                 }
@@ -951,7 +938,7 @@ class Congo{
                             // p.KMove();     
                             // p.ZMove();
                             // p.GMove();
-                            p.PMove();
+                            // p.PMove();
                             // p.SPMove();
                             fetch = p.Print();
                             
@@ -972,7 +959,7 @@ class Congo{
                             // p.KMove();     
                             // p.ZMove();
                             // p.GMove();
-                            p.PMove();
+                            // p.PMove();
                             // p.SPMove();
                             fetch = p.Print();
                             
@@ -1001,7 +988,6 @@ vector<string>moves_vector;
 
 void clearArray(){
     files_vector.clear();
-    // moves_vector.clear();
 }
 
 int main(){
