@@ -66,7 +66,6 @@ class Point{
                 if((curr_y_move<=2 && curr_y_move>=0) || (curr_y_move<=6 && curr_y_move>=4) ){
                     if(turn == "b"){
                         if(isupper(Files.at(6-curr_y_move)[curr_x_move]) || Files.at(6-curr_y_move)[curr_x_move] =='0'){
-                            // cout<<Files.at(6-curr_y_move)[curr_x_move]<<"x:"<<curr_x_move<<"y:"<<curr_y_move<<endl;    
                             valid = true;   //yep valid
                         }
                     }
@@ -92,7 +91,6 @@ class Point{
                 if(curr_y_move <= 6 && curr_y_move >= 0 ){
                     if(turn == "b"){
                         if(isupper(Files.at(6-curr_y_move)[curr_x_move]) || Files.at(6-curr_y_move)[curr_x_move] =='0'){
-                            // cout<<Files.at(6-curr_y_move)[curr_x_move]<<"x:"<<curr_x_move<<"y:"<<curr_y_move<<endl;    
                             valid = true;   //yep valid
                         }
                     }
@@ -100,17 +98,13 @@ class Point{
                         //finally got it, it works with ranks not files
                     else if(turn == "w"){
                         if(islower(Files.at(6-curr_y_move)[curr_x_move]) || Files.at(6-curr_y_move)[curr_x_move] =='0'){
-                            // cout<<Files.at(6-curr_y_move)[curr_x_move]<<endl;
-                            // cout<<"debug"<<Files.at(6)[3]<<endl;
                             valid = true;   //yebo yes
                         }
                     }
                 }
             }
             return valid;
-        
         }
-
         
         bool ValidG(int curr_x_move,int curr_y_move){
             bool valid = false;
@@ -120,7 +114,6 @@ class Point{
                 if(curr_y_move <= 6 && curr_y_move >= 0 ){
                     if(turn == "b"){
                         if(Files.at(6-curr_y_move)[curr_x_move] =='0'){
-                            // cout<<Files.at(6-curr_y_move)[curr_x_move]<<"x:"<<curr_x_move<<"y:"<<curr_y_move<<endl;    
                             valid = true;   //yep valid
                         }
                     }
@@ -128,8 +121,6 @@ class Point{
                         //finally got it, it works with ranks not files
                     else if(turn == "w"){
                         if(Files.at(6-curr_y_move)[curr_x_move] =='0'){
-                            // cout<<Files.at(6-curr_y_move)[curr_x_move]<<endl;
-                            // cout<<"debug"<<Files.at(6)[3]<<endl;
                             valid = true;   //yebo yes
                         }
                     }
@@ -146,8 +137,7 @@ class Point{
                 //board bound for files
                 if(curr_y_move <= 6 && curr_y_move >= 0 ){
                     if(turn == "b"){
-                        if(isupper(Files.at(6-curr_y_move)[curr_x_move]) || Files.at(6-curr_y_move)[curr_x_move] =='0'){
-                            // cout<<Files.at(6-curr_y_move)[curr_x_move]<<"x:"<<curr_x_move<<"y:"<<curr_y_move<<endl;    
+                        if(isupper(Files.at(6-curr_y_move)[curr_x_move]) || Files.at(6-curr_y_move)[curr_x_move] =='0'){  
                             valid = true;   //yep valid
                         }
                     }
@@ -155,8 +145,6 @@ class Point{
                         //finally got it, it works with ranks not files
                     else if(turn == "w"){
                         if(islower(Files.at(6-curr_y_move)[curr_x_move]) || Files.at(6-curr_y_move)[curr_x_move] =='0'){
-                            // cout<<Files.at(6-curr_y_move)[curr_x_move]<<endl;
-                            // cout<<"debug"<<Files.at(6)[3]<<endl;
                             valid = true;   //yebo yes
                         }
                     }
@@ -173,8 +161,7 @@ class Point{
                 //board bound for files
                 if(curr_y_move <= 6 && curr_y_move >= 0 ){
                     if(turn == "b"){
-                        if(Files.at(6-curr_y_move)[curr_x_move] =='0'){
-                            // cout<<Files.at(6-curr_y_move)[curr_x_move]<<"x:"<<curr_x_move<<"y:"<<curr_y_move<<endl;    
+                        if(Files.at(6-curr_y_move)[curr_x_move] =='0'){  
                             valid = true;   //yep valid
                         }
                     }
@@ -182,8 +169,6 @@ class Point{
                         //finally got it, it works with ranks not files
                     else if(turn == "w"){
                         if(Files.at(6-curr_y_move)[curr_x_move] =='0'){
-                            // cout<<Files.at(6-curr_y_move)[curr_x_move]<<endl;
-                            // cout<<"debug"<<Files.at(6)[3]<<endl;
                             valid = true;   //yebo yes
                         }
                     }

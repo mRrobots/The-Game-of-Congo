@@ -311,8 +311,6 @@ class Point{
         };
         //zebra
         void Zebra(){
-
-            // cout<<"x:"<<x<<" y:"<<y<<endl;
             int curr_y = y+2;
             int curr_x = x+1;
             if(ValidZ(curr_x,curr_y)){
@@ -732,22 +730,59 @@ class Point{
             rightup();
             SpecialMove();
         }
+
+        void AllMoves(){
+            PMove();
+            SPMove();
+            GMove();
+            ZMove();
+            KMove();
+        }
 };
 class Congo{
     public:
+
         string FEN;         //posiotions
         string Turn = "";   //represent a players turn
         int M_number;   //represent a number of moves
+        bool Gamestate;
         string Move = "";   //move to be played
         vector<string>File; //represent a board
 
 
-        Congo(string fen,string turn,int m_number,vector<string>file ,string move){
+        Congo(string fen,string turn,int m_number,bool game,vector<string>file ,string move){
             this->FEN = fen;
             this->Turn = turn;
             this->M_number = m_number;
             this->File = file;
             this->Move = move;
+            this->Gamestate = game;
+        }
+
+        void Play(){
+            // PrintFile();
+            // cout<< "Current Score :" << Evaluate() << endl;
+            // int depth = 2;
+            int v = MinMax(this->File,2);
+            Score();
+            // PrintFile();
+            // cout<<"Score After Move :"<<Evaluate();
+
+        }
+        
+        int MinMax(vector<string>curr_state,int depth){
+            if(isGameOver() || depth <= 0){
+                // return Evaluate();
+            }
+            int value = -10000000;
+            vector<string> moves = generateMoves();
+            for(int i = 0;i < moves.size(); i++){
+                this->Move = moves.at(i); 
+                vector<string> state = Execute();
+                int eval = -MinMax(state ,depth-1);
+                value = max(value,eval);
+            }
+            return value;
         }
         //Print Board
         void PrintFile(){
@@ -759,19 +794,26 @@ class Congo{
             }
         }
 
+        bool isGameOver(){
+            int blackking = FEN.find('l');
+            int whiteking = FEN.find('L');
+
+            if(blackking == -1 || whiteking == -1){
+                return true; //one or more Lion is not on the board,hence game over
+            }
+            return false; //we still playing
+        }
+
         int Bvalue(){
             int score = 0;
             for(int i=0;i<FEN.size();i++){
                 if(FEN[i] == 'p'){
                     score += 100;
-                }
-                else if(FEN[i] == 'z'){
+                }else if(FEN[i] == 'z'){
                     score += 300;
-                }
-                else if(FEN[i] == 's'){
+                }else if(FEN[i] == 's'){
                     score += 350;
-                }
-                else if(FEN[i] == 'g'){
+                }else if(FEN[i] == 'g'){
                     score += 400;
                 }
             }
@@ -783,86 +825,149 @@ class Congo{
             for(int i=0;i<FEN.size();i++){
                 if(FEN[i] == 'P'){
                     score += 100;
-                }
-                else if(FEN[i] == 'Z'){
+                }else if(FEN[i] == 'Z'){
                     score += 300;
-                }
-                else if(FEN[i] == 'S'){
+                }else if(FEN[i] == 'S'){
                     score += 350;
-                }
-                else if(FEN[i] == 'G'){
+                }else if(FEN[i] == 'G'){
                     score += 400;
                 }
             }
             return score;
         }
 
-        int Point1(){
-            
-            int blackking = FEN.find('l');
-            int whiteking = FEN.find('L');
-
-            if(blackking !=-1 && whiteking!=-1){
-                //lions are available
-                // int number_pieces = 0;
-                for(int i=0;i<FEN.length();i++){
-                    if(FEN[i] =='z' || FEN[i] =='s' || FEN[i] =='g'||FEN[i] =='p' || FEN[i] =='Z' || FEN[i] =='S' || FEN[i] =='G'||FEN[i] =='P'){
-                        // number_pieces++;
-                        return 1; //some pieces are available
-                    }
-                }
-                return 0; //no available
-            }
-            return -1;//one of the lion is not there
-        }
-
-        int Evaluate(){
-
-            int score = 0;
-            int points = Point1();
-            //point 1
-            if(points == 0){
-                return score;
-            }
-            else if(points == -1){
+        int Winner(){
+            if(isGameOver()){             
                 int blackking = FEN.find('l');
                 int whiteking = FEN.find('L');
-                // point 2
-                if(blackking == -1){
-                    score =  10000;
-                    return score;
+
+                if(blackking == -1){    
+                    return 10000; //white wins
                 }
-                // point 3
-                else if(whiteking == -1){
-                    score =  -10000;
-                    return score;
+                return -10000; //black wins
+            }
+            return 0; //no winner
+        }
+        int Material(){
+
+            int wscore = Wvalue();  //white score
+            int bscore = Bvalue();  //black score
+
+            int finalscore = wscore - bscore;
+
+            if(finalscore == 0 ){
+                return 0; //represents a draw
+            }
+            return finalscore; //some material on the board 
+        }
+
+        int  Mobility(){
+            string realturn = this->Turn;
+            this->Turn = "w";
+            vector<string> moves = generateMoves();
+            int wscore = moves.size();
+            // cout<<wscore<<endl;
+            this->Turn = "b";
+            moves = generateMoves();
+            int bscore = moves.size();
+            // cout<<bscore<<endl;
+            this->Turn = realturn;
+
+            int finalscore = wscore - bscore;
+            return finalscore;
+        }
+
+        int WhiteAttack(){
+            int attackscore = 0;
+            vector<string> moves = generateMoves();
+            for(int i=0;i<moves.size();i++){
+                string curr_move = moves.at(i); //current move
+                
+                int x_to = int(curr_move[2]) -97;   //move to be x
+                int y_to = curr_move[3]-'0';
+                y_to = 7- y_to;//move to be y
+
+                if(islower(File.at(y_to)[x_to])){
+                    if(File.at(y_to)[x_to] == 'l' ){
+                        attackscore = attackscore+10;
+                    }
+                    // else{
+                        attackscore = attackscore+1;
+                    // }                
                 }
             }
-             //point 4
-            int wscore = Wvalue();
-            int bscore = Bvalue();
-            score = wscore - bscore;
-            return score;
+            return attackscore;
+        }
+        
+        int BlackAttack(){
+            int attackscore = 0;
+            vector<string> moves = generateMoves();
+            for(int i=0;i<moves.size();i++){
+                string curr_move = moves.at(i); //current move
+                
+                int x_to = int(curr_move[2]) -97;   //move to be x
+                int y_to = curr_move[3]-'0';
+                y_to = 7- y_to;//move to be y
+
+                if(isupper(File.at(y_to)[x_to])){
+                    if(File.at(y_to)[x_to] == 'L' ){
+                        attackscore = attackscore+10;
+                    }
+                    // else{
+                        attackscore = attackscore+1;
+                    // }                
+                }
+            }
+            return attackscore;
+        }
+        int Attack(){
+            int attackscore = 0;
+            if(Turn == "w"){
+                int whitescore = WhiteAttack();
+                Turn="b"; //assume its black to play
+                int blackscore = BlackAttack();
+                attackscore = whitescore - blackscore;
+                Turn ="w"; //return the turn to the owner :/
+            }
+            else if(Turn == "b"){
+                int blackscore = BlackAttack();
+                Turn="w"; //assume its black to white
+                int whitescore = WhiteAttack();
+                attackscore = whitescore - blackscore;
+                Turn="b"; //return the turn to the owner :/
+            }
+            return attackscore;
         }
 
         void Score(){
-            if(Evaluate() == 0){
-                cout<< 0;
+            if(Winner() == 0){
+                //both lions are still on the board
+                if(Material() != 0){
+                    int finalscore = Attack() + Material() + Mobility();
+                    if(Turn == "b"){
+                        cout<<finalscore*-1;
+                    }
+                    else{
+                        cout<<finalscore;
+                    }
+                }
+                else{
+                    //draw
+                    cout<<Material();
+                }
             }
             else{
-                int finalscore = Evaluate();
-                if(Turn == "b"){
-                    finalscore = finalscore*-1;
-                    cout<<finalscore;
-                    return;
-                }
-                cout<<finalscore;
+                //Some lion is missing
+                cout<<Winner();
             }
         }
 
-        void Execute(){
+        vector<string> Execute(){
             vector<int> P_in_river_before;
             vector<char> P;
+            //state to work with
+            vector<string>curr_file = this->File;
+            
             //from
             int x_from = int(Move[0]) -97;
             int y_from = Move[1]-'0';
@@ -872,36 +977,38 @@ class Congo{
             int y_to = Move[3]-'0';
             y_to = 7- y_to;
             //pieces in the river in coordinate
-            Piece_in_River_before(P_in_river_before);
+            Piece_in_River_before(P_in_river_before,curr_file);
             //store the piece
             for(int i=0;i<P_in_river_before.size();i++){
-                P.push_back(File.at(3)[P_in_river_before.at(i)]);
+                P.push_back(curr_file.at(3)[P_in_river_before.at(i)]);
             }
             //move the piece from_to :/
-            From_To(x_from,y_from,x_to,y_to);
+            From_To(x_from,y_from,x_to,y_to,curr_file);
             /*remove piece in river
-               2 cases: 
+             2 cases: 
                 1.moved
                 2.haven't moved
-            good luck :/ */
+             good luck :/ 
+            */
             for(int i=0;i<P_in_river_before.size();i++){
                 string file = File.at(3);
                 //still here,haven't moved (x,y) 1 case 
                 if(P.at(i) == file[P_in_river_before.at(i)]){
-                    this->File.at(3)[P_in_river_before.at(i)] = '0';
+                    curr_file.at(3)[P_in_river_before.at(i)] = '0';
                 }
                 //moved but same still on the river(3,y) 2nd case
                 else if(y_to - y_from == 0 ){
-                    this->File.at(3)[x_to] = '0';
+                    curr_file.at(3)[x_to] = '0';
                 }
             }
             //other stuff
-            Move_counter();
-            string state = State();
-            Side_to_play();
-            this->FEN =  To_fen();
-            cout<<FEN<<" "<<Turn<<" "<<M_number<<endl;
-            cout<<state;
+            // Move_counter();
+            // string state = State();
+            // Side_to_play();
+            this->FEN =  To_fen(curr_file);
+            return curr_file;
+            // cout<<FEN<<" "<<Turn<<" "<<M_number<<endl;
+            // cout<<state;
             // PrintFile();
         }
 
@@ -943,16 +1050,16 @@ class Congo{
             return state;
         }
 
-       void Piece_in_River_before(vector<int>& P_in_river){
+        void Piece_in_River_before(vector<int>& P_in_river,vector<string>&curr_file){
             //store the coordiante
             for(int i=0;i<7;i++){
                 if(Turn=="w"){
-                    if(isupper(File.at(3)[i])){
+                    if(isupper(curr_file.at(3)[i])){
                         P_in_river.push_back(i);
                     }
                 }
                 else if(Turn == "b"){
-                    if(islower(File.at(3)[i])){
+                    if(islower(curr_file.at(3)[i])){
                         P_in_river.push_back(i);
                     }
                 }
@@ -974,48 +1081,45 @@ class Congo{
             }
         }
 
-       void From_To(int x1,int y1,int x2,int y2){
+       void From_To(int x1,int y1,int x2,int y2,vector<string>&curr_file){
 
-            char from = File.at(y1)[x1];
+            char from = curr_file.at(y1)[x1];
             //super pawn stuff for black
             if(Turn == "b"){
-                if(y1 == 5 && this->File.at(y1)[x1]=='p' && y2 == 6){
+                if(y1 == 5 && curr_file.at(y1)[x1]=='p' && y2 == 6){
                     from = 's';
                 }
             }
             //super pawn stuff for white
             if(Turn == "w"){
-                if(y1 == 1 && this->File.at(y1)[x1]=='P' && y2 == 0){
+                if(y1 == 1 && curr_file.at(y1)[x1]=='P' && y2 == 0){
                     from = 'S';
                 }
             }
-            this->File.at(y2)[x2] = from;
-            this->File.at(y1)[x1] = '0';
+            curr_file.at(y2)[x2] = from;
+            curr_file.at(y1)[x1] = '0';
         }
 
-        string To_fen(){
+        string To_fen(vector<string>&curr_file){
             string fen = "";
             for(int i=0;i<7;i++){
-                string file = File.at(i);
+                string file = curr_file.at(i);
                 int k = 0;
                 for(int j=0;j<7;j++){
                     if(file[j]=='0'){
                         k++;
-                    }
-                    else if(isalpha(file[j])){
+                    }else if(isalpha(file[j])){
                         if(k!=0){
                             fen+=to_string(k);
                             k=0;
                         }
                         fen += file[j];
-                    }
-                    if(j+1>6){
+                    }if(j+1>6){
                         if(k!=0){
                             fen+=to_string(k);
                             k=0;
                         }
-                    }
-                    if(j==6 && i!=6){
+                    }if(j==6 && i!=6){
                         fen+="/";
                     }
                 }
@@ -1023,60 +1127,76 @@ class Congo{
             return fen;
         }
         // Possible moves
-        void GameRule(){
+        vector<string> generateMoves(){
             vector<string> output;
             for(int j=0;j<7;j++){
                 if(Turn == "b"){
                     // j represents a row
-                    string file = File.at(j);
+                    string file = this->File.at(j);
                     for (int i=0;i<file.size();i++){
-                        if(file[i] == 'p'){
-                            vector<string> fetch;
-                            Point p = Point(i,6-j,NULL,File,Turn);
-                            // p.KMove();     
-                            // p.ZMove();
-                            // p.GMove();
-                            // p.PMove();
-                            // p.SPMove();
-                            fetch = p.Print();
-                            
-                            for(string str:fetch){
-                                output.push_back(str);
-                            }
+                        vector<string> fetch;
+                        Point *p;
+                        if(file[i] == 'l'){
+                            p = new Point(i,6-j,NULL,File,Turn);
+                            p->KMove();   
+                            fetch = p->Print();  
+                        }if(file[i] == 'g'){
+                            p = new Point(i,6-j,NULL,File,Turn);
+                            p->GMove();   
+                            fetch = p->Print();  
+                        }if(file[i] == 'z'){
+                            p = new  Point(i,6-j,NULL,File,Turn);
+                            p->ZMove();   
+                            fetch = p->Print();  
+                        }if(file[i] == 's'){
+                            p = new Point(i,6-j,NULL,File,Turn);
+                            p->SPMove();   
+                            fetch = p->Print();  
+                        }if(file[i] == 'p'){
+                            p = new Point(i,6-j,NULL,File,Turn);
+                            p->PMove();   
+                            fetch = p->Print();  
+                        }
+                        for(string str:fetch){
+                            output.push_back(str);
                         }
                     }
-                }
-                else if (Turn == "w"){
-                    
+                }else if (Turn == "w"){
                     string file = File.at(j);
                     //this loops only once,got it
                     for (int i=0;i<file.size();i++){
-                        if(file[i] == 'P'){
-                            vector<string> fetch;
-                            Point p = Point(i,6-j,NULL,File,Turn);
-                            // p.KMove();     
-                            // p.ZMove();
-                            // p.GMove();
-                            // p.PMove();
-                            // p.SPMove();
-                            fetch = p.Print();
-                            
-                            for(string str:fetch){
-                                output.push_back(str);
-                            }
+                        vector<string> fetch;
+                        Point *p;
+                        if(file[i] == 'L'){
+                            p = new Point(i,6-j,NULL,File,Turn);
+                            p->KMove();   
+                            fetch = p->Print();  
+                        }if(file[i] == 'G'){
+                            p = new Point(i,6-j,NULL,File,Turn);
+                            p->GMove();   
+                            fetch = p->Print();  
+                        }if(file[i] == 'Z'){
+                            p = new  Point(i,6-j,NULL,File,Turn);
+                            p->ZMove();   
+                            fetch = p->Print();  
+                        }if(file[i] == 'S'){
+                            p = new Point(i,6-j,NULL,File,Turn);
+                            p->SPMove();   
+                            fetch = p->Print();  
+                        }if(file[i] == 'P'){
+                            p = new Point(i,6-j,NULL,File,Turn);
+                            p->PMove();   
+                            fetch = p->Print();  
+                        }        
+                        for(string str:fetch){
+                            output.push_back(str);
                         }
                     }
                 }
             }
 
             sort(output.begin(),output.end());
-            for(int i=0;i<output.size();i++){
-                cout<<output.at(i);
-                //some nice printing 
-                if(i<output.size()-1){
-                    cout<<" ";
-                }
-            }
+            return output;
         }
 };
 
@@ -1228,11 +1348,13 @@ int main(){
         files_vector.push_back(file1);
 
         int m_number_int =stoi(m_number);
-        Congo congo = Congo(fen,turn,m_number_int,files_vector,move);
+        Congo congo = Congo(fen,turn,m_number_int,false,files_vector,move);
         // congo.PrintFile();
-        // congo.GameRule();
+        // congo.generateMoves();
         // congo.Execute();
         congo.Score();
+        // congo.Mobility();
+        // congo.Play();
         
         clearArray();
 

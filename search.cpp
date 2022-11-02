@@ -1,10 +1,10 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <fstream>
 using namespace std;
 
-
-
+ofstream MyFile("filename.txt");
 class Point{
     private:
         Point *Parent;  //for later cool stuff
@@ -311,8 +311,6 @@ class Point{
         };
         //zebra
         void Zebra(){
-
-            // cout<<"x:"<<x<<" y:"<<y<<endl;
             int curr_y = y+2;
             int curr_x = x+1;
             if(ValidZ(curr_x,curr_y)){
@@ -732,164 +730,268 @@ class Point{
             rightup();
             SpecialMove();
         }
+
+        void AllMoves(){
+            PMove();
+            SPMove();
+            GMove();
+            ZMove();
+            KMove();
+        }
 };
 class Congo{
+    private:
+       vector<string>Parent_File;
+       string Parent_FEN;
     public:
+
         string FEN;         //posiotions
         string Turn = "";   //represent a players turn
         int M_number;   //represent a number of moves
+        bool Gamestate;
         string Move = "";   //move to be played
         vector<string>File; //represent a board
 
 
-        Congo(string fen,string turn,int m_number,vector<string>file ,string move){
+        Congo(string fen,string turn,int m_number,bool game,vector<string>file ,string move){
             this->FEN = fen;
             this->Turn = turn;
             this->M_number = m_number;
             this->File = file;
             this->Move = move;
+            this->Gamestate = game;
+            this->Parent_File = file;
+            this->Parent_FEN = fen;
         }
 
+        void PrintMove(vector<string>output){
+            for(int i=0;i<output.size();i++){
+                cout<<output.at(i);
+                //some nice printing
+                if(i<output.size()-1){
+                    cout<<" ";
+                }
+            }
+            cout<<"/..........//"<<endl;
+        }
+        void Play(){
+            // PrintFile(File);
+            int v = MinMax(this->FEN,this->File,this->Turn,this->M_number,2);
+            cout<<v;
+            MyFile<<v<<endl;;
+            // cout<<endl;
+            // PrintFile(File);
+            // cout<<endl;
+            // PrintFile();
+        }
+        
+        int MinMax(string curr_state,vector<string>files,string turn,int c,int depth){
+            // MyFile<<curr_state<<":"<<ScoreEvaluation(curr_state)<<endl;
+            if(isGameOver(curr_state) || depth <= 0){
+                return ScoreEvaluation(curr_state,turn);
+            }
+            int value = -10000000;
+            vector<string> moves = generateMoves(files,turn);
+            // PrintMove(moves);
+            for(int i = 0;i < moves.size(); i++){
+                string move = moves.at(i); 
+                // MyFile<<curr_state<<".."<<Evaluate(curr_state,turn)<<".."<<move<<".."<<value<<endl;
+                vector<string> board = Execute(files,move,curr_state,turn);
+                string new_turn = Side_to_play(turn);
+                string next_state = To_fen(board,c,new_turn);
+                // MyFile<<".."<<next_state<<".."<<Evaluate(next_state,turn)<<endl;
+                // MyFile<<new_turn<<endl;
+                int eval = -MinMax(next_state,board,new_turn,c,depth-1);
+                value = max(value,eval);
+                // MyFile <<eval<<"..."<<value<<"...:"<<ScoreEvaluation(next_state,turn)<<endl;
+            }
+            return value;
+        }
         //Print Board
-        void PrintFile(){
+        void PrintFile(vector<string>file){
             for(int i=0;i<7;i++){
                 for(int j=0;j<7;j++){
-                    cout<<File.at(i)[j]<<" ";
+                    cout<<file.at(i)[j]<<" ";
                 }
                 cout<<endl;
             }
         }
 
-        int Bvalue(){
+        bool isGameOver(string fen){
+            // cout<<fen<<endl;
+            int blackking = fen.find('l');
+            int whiteking = fen.find('L');
+
+            if(blackking == -1 || whiteking == -1){
+                return true;
+            }
+            return false;
+        }
+
+        // void game(){
+        //     if(isGameOver(FEN)){
+        //         cout<<"Game over";
+        //     }
+        //     cout<<"We still playing";
+        // }
+
+        int Bvalue(string fen){
             int score = 0;
-            for(int i=0;i<FEN.size();i++){
-                if(FEN[i] == 'p'){
+            for(int i=0;i<fen.size();i++){
+                if(fen[i] == 'p'){
                     score += 100;
-                }
-                else if(FEN[i] == 'z'){
+                }else if(fen[i] == 'z'){
                     score += 300;
-                }
-                else if(FEN[i] == 's'){
+                }else if(fen[i] == 's'){
                     score += 350;
-                }
-                else if(FEN[i] == 'g'){
+                }else if(fen[i] == 'g'){
                     score += 400;
                 }
             }
             return score;
         }
 
-        int Wvalue(){
+        int Wvalue(string fen){
             int score = 0;
             for(int i=0;i<FEN.size();i++){
-                if(FEN[i] == 'P'){
+                if(fen[i] == 'P'){
                     score += 100;
-                }
-                else if(FEN[i] == 'Z'){
+                }else if(fen[i] == 'Z'){
                     score += 300;
-                }
-                else if(FEN[i] == 'S'){
+                }else if(fen[i] == 'S'){
                     score += 350;
-                }
-                else if(FEN[i] == 'G'){
+                }else if(fen[i] == 'G'){
                     score += 400;
                 }
             }
             return score;
         }
 
-        int Evaluate(){
-            int blackking = FEN.find('l');
-            int whiteking = FEN.find('L');
+        int Point1(string fen){
+            
+            int blackking = fen.find('l');
+            int whiteking = fen.find('L');
 
-            if(blackking == -1){
-                // cout<<10000;
-                return 10000;
+            if(blackking !=-1 && whiteking!=-1){
+                //lions are available
+                for(int i=0;i<fen.length();i++){
+                    if(fen[i] =='z' || fen[i] =='s' || fen[i] =='g'|| fen[i] =='p' 
+                    || fen[i] =='Z' || fen[i] =='S' || fen[i] =='G'|| fen[i] =='P'){
+                        return 1; //some pieces are available
+                    }
+                }
+                return 0; //no available
             }
-            
-            else if(whiteking == -1){
-                // cout<<-10000;
-                return -10000;
-            }
+            return -1;//one of the lion is not there
+        }
 
-            
-            int wscore = Wvalue();
-            int bscore = Bvalue();
-            
-            int finalscore = wscore - bscore;
-            if(finalscore == 0 ){
-                // cout<<0;
+        int Evaluate(string fen,string turn){
+
+            int score = 0;
+            int points = Point1(fen);
+            //point 1
+            if(points == 0){
+                return score;
+            }
+            else if(points == -1){
+                int blackking = fen.find('l');
+                int whiteking = fen.find('L');
+                // point 2
+                if(blackking == -1){
+                    score =  10000;
+                    return score;
+                }
+                // point 3
+                else if(whiteking == -1){
+                    score =  -10000;
+                    return score;
+                }
+            }
+             //point 4
+            int wscore = Wvalue(fen);
+            int bscore = Bvalue(fen);
+            score = wscore - bscore;
+            return score;
+        }
+
+        int ScoreEvaluation(string fen,string turn){
+            if(Evaluate(fen,turn) == 0){
                 return 0;
             }
             else{
-                if(Turn == "b"){
+                int finalscore = Evaluate(fen,turn);
+                if(turn == "b"){
                     finalscore = finalscore*-1;
+                    // cout<<finalscore;
+                    return finalscore;
                 }
-                // cout<<finalscore;
                 return finalscore;
             }
         }
 
-        void Score(){
-            cout<<Evaluate();
+        void Score(string turn){
+            string fen  = this->FEN;
+            if(Evaluate(fen,turn) == 0){
+                cout<< 0;
+            }
+            else{
+                int finalscore = Evaluate(fen,turn);
+                if(turn == "b"){
+                    finalscore = finalscore*-1;
+                    cout<<finalscore;
+                    return;
+                }
+                cout<<finalscore;
+            }
         }
 
-        void Execute(){
+        vector<string> Execute(vector<string>curr_file,string move,string state,string turn){
             vector<int> P_in_river_before;
             vector<char> P;
-            //remember row->col
-            // cout<<Move<<endl;
+            //state to work with
+            // vector<string>curr_file = this->File;
+            int counter = this->M_number;
+            // string player = this->turn;
             //from
-            int x_from = int(Move[0]) -97;
-            int y_from = Move[1]-'0';
+            int x_from = int(move[0]) -97;
+            int y_from = move[1]-'0';
             y_from = 7-y_from ;
             //to
-            int x_to = int(Move[2]) -97;
-            int y_to = Move[3]-'0';
+            int x_to = int(move[2]) -97;
+            int y_to = move[3]-'0';
             y_to = 7- y_to;
-            // move the peice and put a new one
-            // cout<<"From river"<<endl;
-            // cout<<File.at(3)<<endl;
-            Piece_in_River_before(P_in_river_before);
-            // cout<<"From river"<<endl;
+            //pieces in the river in coordinate
+            Piece_in_River_before(P_in_river_before,curr_file,turn);
+            //store the piece
             for(int i=0;i<P_in_river_before.size();i++){
-                // cout<<"From river"<<endl;
-                P.push_back(File.at(3)[P_in_river_before.at(i)]);
-                // cout<<(File.at(3)[P_in_river_before.at(i)])<<endl;
+                P.push_back(curr_file.at(3)[P_in_river_before.at(i)]);
             }
-            // for(int i=0;i<P.size();i++){
-            //     cout<<P.at(i)<<endl;
-            // }
-            From_To(x_from,y_from,x_to,y_to);
-            // Piece_in_River_before(P_in_river_after);
+            //move the piece from_to :/
+            From_To(x_from,y_from,x_to,y_to,curr_file,turn);
+            /*remove piece in river
+             2 cases: 
+                1.moved
+                2.haven't moved
+             good luck :/ 
+            */
             for(int i=0;i<P_in_river_before.size();i++){
-                // cout<<"After river"<<endl;
-                // cout<<(File.at(3)[P_in_river_before.at(i)])<<endl;
-                // cout<<P.at(i);
-
                 string file = File.at(3);
-                int c = file.find(P.at(i)); 
-                if(c!=-1){
-                    this->File.at(3)[c] = '0';
+                //still here,haven't moved (x,y) 1 case 
+                if(P.at(i) == file[P_in_river_before.at(i)]){
+                    curr_file.at(3)[P_in_river_before.at(i)] = '0';
                 }
-                // if( File.at(3)[P_in_river_before.at(i)] == P.at(i) ){
-                //     this->File.at(3)[P_in_river_before.at(i)] = '0';
-                // }
+                //moved but same still on the river(3,y) 2nd case
+                else if(y_to - y_from == 0 ){
+                    curr_file.at(3)[x_to] = '0';
+                }
             }
-
-            Move_counter();
-
-            string state = State();
-
-            Side_to_play();
-
-            this->FEN =  To_fen();
-
-            cout<<FEN<<" "<<Turn<<" "<<M_number<<endl;
-            cout<<state;
-
+            //other stuff
+            Move_counter(counter,turn);
+            // string state = State();
+            turn = Side_to_play(turn);
+            state =  To_fen(curr_file,counter,turn);
+            return curr_file;
             // PrintFile();
-        
         }
 
         string State(){
@@ -905,7 +1007,6 @@ class Congo{
                     else{
                         black = false;
                     }
-
                 }
                 if(!black){
                     return  "White wins";
@@ -931,127 +1032,158 @@ class Congo{
             return state;
         }
 
-        void Piece_in_River_before(vector<int>& P_in_river){
+        void Piece_in_River_before(vector<int>& P_in_river,vector<string>&curr_file,string turn){
+            //store the coordiante
             for(int i=0;i<7;i++){
-                if(Turn=="w"){
-                    if(isupper(File.at(3)[i])){
+                if(turn=="w"){
+                    if(isupper(curr_file.at(3)[i])){
                         P_in_river.push_back(i);
                     }
                 }
-                else{
-                    if(islower(File.at(3)[i])){
+                else if(turn == "b"){
+                    if(islower(curr_file.at(3)[i])){
                         P_in_river.push_back(i);
                     }
                 }
             }
         }
 
-        void Side_to_play(){
-            if(Turn=="b"){
-                this->Turn = "w";
+        string Side_to_play(string player){
+            if(player=="b"){
+                player = "w";
             }
             else{
-                this->Turn = "b";
+                player = "b";
+            }
+            return player;
+        }
+
+        void Move_counter(int &counter,string player){
+            if(player == "b"){
+                counter++;
             }
         }
 
-        void Move_counter(){
-            if(Turn=="b"){
-                this->M_number++;
+       void From_To(int x1,int y1,int x2,int y2,vector<string>&curr_file,string turn){
+
+            char from = curr_file.at(y1)[x1];
+            //super pawn stuff for black
+            if(turn == "b"){
+                if(y1 == 5 && curr_file.at(y1)[x1]=='p' && y2 == 6){
+                    from = 's';
+                }
             }
+            //super pawn stuff for white
+            if(turn == "w"){
+                if(y1 == 1 && curr_file.at(y1)[x1]=='P' && y2 == 0){
+                    from = 'S';
+                }
+            }
+            curr_file.at(y2)[x2] = from;
+            curr_file.at(y1)[x1] = '0';
         }
 
-        void From_To(int x1,int y1,int x2,int y2){
-            this->File.at(y2)[x2] = File.at(y1)[x1];
-            this->File.at(y1)[x1] = '0';
-        }
-
-        string To_fen(){
+        string To_fen(vector<string>&curr_file,int counter,string player){
             string fen = "";
             for(int i=0;i<7;i++){
-                string file = File.at(i);
+                string file = curr_file.at(i);
                 int k = 0;
                 for(int j=0;j<7;j++){
                     if(file[j]=='0'){
                         k++;
-                    }
-                    else if(isalpha(file[j])){
+                    }else if(isalpha(file[j])){
                         if(k!=0){
                             fen+=to_string(k);
                             k=0;
                         }
                         fen += file[j];
-                    }
-                    if(j+1>6){
+                    }if(j+1>6){
                         if(k!=0){
                             fen+=to_string(k);
                             k=0;
                         }
-                    }
-                    if(j==6 && i!=6){
+                    }if(j==6 && i!=6){
                         fen+="/";
                     }
                 }
             }
-            
-            // cout<<fen<<endl;
+            fen+=" ";
+            fen+=player;
+            fen+=" ";
+            fen+= to_string(counter);
             return fen;
         }
         // Possible moves
-        void GameRule(){
+        vector<string> generateMoves(vector<string>files,string turn){
             vector<string> output;
             for(int j=0;j<7;j++){
-                if(Turn == "b"){
+                if(turn == "b"){
                     // j represents a row
-                    string file = File.at(j);
+                    string file = files.at(j);
                     for (int i=0;i<file.size();i++){
-                        if(file[i] == 'p'){
-                            vector<string> fetch;
-                            Point p = Point(i,6-j,NULL,File,Turn);
-                            // p.KMove();     
-                            // p.ZMove();
-                            // p.GMove();
-                            // p.PMove();
-                            // p.SPMove();
-                            fetch = p.Print();
-                            
-                            for(string str:fetch){
-                                output.push_back(str);
-                            }
+                        vector<string> fetch;
+                        Point *p;
+                        if(file[i] == 'l'){
+                            p = new Point(i,6-j,NULL,files,turn);
+                            p->KMove();   
+                            fetch = p->Print();  
+                        }if(file[i] == 'g'){
+                            p = new Point(i,6-j,NULL,files,turn);
+                            p->GMove();   
+                            fetch = p->Print();  
+                        }if(file[i] == 'z'){
+                            p = new  Point(i,6-j,NULL,files,turn);
+                            p->ZMove();   
+                            fetch = p->Print();  
+                        }if(file[i] == 's'){
+                            p = new Point(i,6-j,NULL,files,turn);
+                            p->SPMove();   
+                            fetch = p->Print();  
+                        }if(file[i] == 'p'){
+                            p = new Point(i,6-j,NULL,files,turn);
+                            p->PMove();   
+                            fetch = p->Print();  
+                        }
+                        for(string str:fetch){
+                            output.push_back(str);
                         }
                     }
-                }
-                else if (Turn == "w"){
-                    
-                    string file = File.at(j);
+                }else if (turn == "w"){
+                    string file = files.at(j);
                     //this loops only once,got it
                     for (int i=0;i<file.size();i++){
-                        if(file[i] == 'P'){
-                            vector<string> fetch;
-                            Point p = Point(i,6-j,NULL,File,Turn);
-                            // p.KMove();     
-                            // p.ZMove();
-                            // p.GMove();
-                            // p.PMove();
-                            // p.SPMove();
-                            fetch = p.Print();
-                            
-                            for(string str:fetch){
-                                output.push_back(str);
-                            }
+                        vector<string> fetch;
+                        Point *p;
+                        if(file[i] == 'L'){
+                            p = new Point(i,6-j,NULL,files,turn);
+                            p->KMove();   
+                            fetch = p->Print();  
+                        }if(file[i] == 'G'){
+                            p = new Point(i,6-j,NULL,files,turn);
+                            p->GMove();   
+                            fetch = p->Print();  
+                        }if(file[i] == 'Z'){
+                            p = new  Point(i,6-j,NULL,files,turn);
+                            p->ZMove();   
+                            fetch = p->Print();  
+                        }if(file[i] == 'S'){
+                            p = new Point(i,6-j,NULL,files,turn);
+                            p->SPMove();   
+                            fetch = p->Print();  
+                        }if(file[i] == 'P'){
+                            p = new Point(i,6-j,NULL,files,turn);
+                            p->PMove();   
+                            fetch = p->Print();  
+                        }        
+                        for(string str:fetch){
+                            output.push_back(str);
                         }
                     }
                 }
             }
 
             sort(output.begin(),output.end());
-            for(int i=0;i<output.size();i++){
-                cout<<output.at(i);
-                //some nice printing 
-                if(i<output.size()-1){
-                    cout<<" ";
-                }
-            }
+            return output;
         }
 };
 
@@ -1203,11 +1335,14 @@ int main(){
         files_vector.push_back(file1);
 
         int m_number_int =stoi(m_number);
-        Congo congo = Congo(fen,turn,m_number_int,files_vector,move);
+        Congo congo = Congo(fen,turn,m_number_int,false,files_vector,move);
         // congo.PrintFile();
-        // congo.GameRule();
+        // congo.generateMoves();
         // congo.Execute();
-        congo.Score();
+        // congo.Score();
+        // cout<<endl;
+        congo.Play();
+        // congo.game();
         
         clearArray();
 

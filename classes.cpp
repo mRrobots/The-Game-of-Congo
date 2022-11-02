@@ -11,7 +11,7 @@ class Point{
         vector<Point*> points;
         int x;
         int y;
-        Point(){}
+        // Point(){}
         Point(int x_point,int y_point,Point *parent){
             // Point *parent = new Point(x,y);
             this->x = x_point;
@@ -47,12 +47,20 @@ class Point{
         }    
 };
 
+// class Hey:public Point{
+//     public:
+//         void call(){
+//             // Print();
+//         }
+// };
+
 int main(){
     Point p = Point(10,10,NULL);
     // Point point(10,10,p);
     // point.Insert();
     p.MoveRight();
     p.Print();
+    cout<<"Hey"<<endl;
     // point.printParent(); 
 
     return 0;
