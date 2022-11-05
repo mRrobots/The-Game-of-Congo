@@ -3,8 +3,7 @@
 #include <algorithm>
 #include <fstream>
 using namespace std;
-
-// ofstream MyFile("filename.txt");
+//class for points
 class Point{
     private:
         Point *Parent;  //for later cool stuff
@@ -739,12 +738,12 @@ class Point{
             KMove();
         }
 };
+//class for the game
 class Congo{
     private:
        vector<string>Parent_File;
        string Parent_FEN;
     public:
-
         string FEN;         //posiotions
         string Turn = "";   //represent a players turn
         int M_number;   //represent a number of moves
@@ -775,39 +774,37 @@ class Congo{
             cout<<"/..........//"<<endl;
         }
         void Play(){
-            // PrintFile(File);
-            int v = MinMax(this->FEN,this->File,this->Turn,this->M_number,2);
+            int v = AlphaBeta(this->FEN,this->File,this->Turn,this->M_number,4,-INT_MAX,INT_MAX);
             cout<<v;
-            // MyFile<<v<<endl;;
-            // cout<<endl;
-            // PrintFile(File);
-            // cout<<endl;
-            // PrintFile();
         }
         
-        int MinMax(string curr_state,vector<string>files,string turn,int c,int depth){
-            // MyFile<<curr_state<<":"<<ScoreEvaluation(curr_state)<<endl;
+        int AlphaBeta(string curr_state,vector<string>files,string turn,int c,int depth,int alpha,int beta){
+            
             if(isGameOver(curr_state) || depth <= 0){
-                return ScoreEvaluation(curr_state,turn);
+                return ScoreEvaluation(files,curr_state,turn);
             }
-            int value = -10000000;
+            
             vector<string> moves = generateMoves(files,turn);
-            // PrintMove(moves);
+            
             for(int i = 0;i < moves.size(); i++){
                 string move = moves.at(i); 
-                // MyFile<<curr_state<<".."<<Evaluate(curr_state,turn)<<".."<<move<<".."<<value<<endl;
+                
                 vector<string> board = Execute(files,move,curr_state,turn);
                 string new_turn = Side_to_play(turn);
                 string next_state = To_fen(board,c,new_turn);
-                // MyFile<<".."<<next_state<<".."<<Evaluate(next_state,turn)<<endl;
-                // MyFile<<new_turn<<endl;
-                int eval = -MinMax(next_state,board,new_turn,c,depth-1);
-                value = max(value,eval);
-                // MyFile <<eval<<"..."<<value<<"...:"<<ScoreEvaluation(next_state,turn)<<endl;
+                
+                int eval = -AlphaBeta(next_state,board,new_turn,c,depth-1,-beta,-alpha);
+                
+                if(eval >= beta){
+                    return beta;
+                }
+                if(eval > alpha){
+                    alpha = eval;
+                }
             }
-            return value;
+            return alpha;
         }
-        //Print Board
+        
         void PrintFile(vector<string>file){
             for(int i=0;i<7;i++){
                 for(int j=0;j<7;j++){
@@ -877,49 +874,55 @@ class Congo{
             }
             return -1;//one of the lion is not there
         }
+
+        int RowScore(vector<string>files,string fen,string turn){
+
+            int material = Evaluate(fen,turn);
+            int mobility = Mobility(files,turn);
+            int attack = Attack(files,turn);
+
+            int rowscore = material + mobility + attack;
+
+            return rowscore;
+        }
+
+        int Lost(string fen){
+            int score = 0;
+            int blackking = fen.find('l');
+            int whiteking = fen.find('L');
+            if(blackking == -1){
+                score =  10000;
+            }
+            else{
+                score =  -10000;
+            }
+            return score;
+        }
         int Evaluate(string fen,string turn){
 
             int score = 0;
-            int points = Point1(fen);
-            //point 1 //draw
-            if(points == 0){
-                return score;
-            }
-            //one the lion  is not there
-            else if(points == -1){
-                int blackking = fen.find('l');
-                int whiteking = fen.find('L');
-                // point 2
-                if(blackking == -1){
-                    score =  10000;
-                    return score;
-                }
-                // point 3
-                else if(whiteking == -1){
-                    score =  -10000;
-                    return score;
-                }
-            }
-             //point 4
-             else if(points == 1 ){
-                int wscore = Wvalue(fen);
-                int bscore = Bvalue(fen);
-                score = wscore - bscore;
-                return score;
-              }
+            int wscore = Wvalue(fen);
+            int bscore = Bvalue(fen);
+            score = wscore - bscore;
+            return score;
+            
         }
         int Mobility(vector<string>files,string turn){
-            string realturn = turn;
-            turn = "w";
-            vector<string> moves = generateMoves(files,turn);
-            int wscore = moves.size();
-            // cout<<wscore<<endl;
-            turn = "b";
-            moves = generateMoves(files,turn);
-            int bscore = moves.size();
-            // cout<<bscore<<endl;
-            turn = realturn;
+            int wscore = 0;
+            int bscore = 0;
+            if (turn == "w"){
+                vector<string> white = generateMoves(files,turn);
+                wscore = white.size();
+                vector<string> black = generateMoves(files,"b");
+                bscore = black.size();
+            }
 
+            else if( turn == "b"){
+                vector<string> black = generateMoves(files,turn);
+                bscore = black.size();
+                vector<string> white = generateMoves(files,"w");
+                wscore = white.size();
+            }
             int finalscore = wscore - bscore;
             return finalscore;
         }
@@ -937,7 +940,7 @@ class Congo{
                     attackscore = attackscore+1;
                     if(files.at(y_to)[x_to] == 'l' ){
                         attackscore = attackscore+10;
-                    }        
+                    }
                 }
             }
             return attackscore;
@@ -950,71 +953,69 @@ class Congo{
                 
                 int x_to = int(curr_move[2]) -97;   //move to be x
                 int y_to = curr_move[3]-'0';
-                y_to = 7- y_to;//move to be y
+                y_to = 7-y_to;//move to be y
 
                 if(isupper(files.at(y_to)[x_to])){
                     attackscore = attackscore+1;
                     if(files.at(y_to)[x_to] == 'L' ){
                         attackscore = attackscore+10;
-                    }              
+                    }                
                 }
             }
             return attackscore;
         }
         int Attack(vector<string>files,string turn){
-            int attackscore = 0;
+            int whitescore = 0;
+            int blackscore = 0;
             if(turn == "w"){
-                int whitescore = WhiteAttack(files,turn);
-                turn="b"; //assume its black to play
-                int blackscore = BlackAttack(files,turn);
-                attackscore = whitescore - blackscore;
-                turn ="w"; //return the turn to the owner :/
+                whitescore = WhiteAttack(files,"w");
+                blackscore = BlackAttack(files,"b");
             }
             else if(turn == "b"){
-                int blackscore = BlackAttack(files,turn);
-                turn="w"; //assume its black to white
-                int whitescore = WhiteAttack(files,turn);
-                attackscore = whitescore - blackscore;
-                turn="b"; //return the turn to the owner :/
+                blackscore = BlackAttack(files,"b");
+                whitescore = WhiteAttack(files,"w");
             }
+            int attackscore = whitescore - blackscore;
             return attackscore;
         }
 
-        int ScoreEvaluation(string fen,string turn){
-            if(Evaluate(fen,turn) == 0){
-                return 0;
+        int ScoreEvaluation(vector<string>files,string fen,string turn){
+            int points = Point1(fen);
+            if((points) == 0){
+                return 0; //draw
             }
-            else{
-                int finalscore = Evaluate(fen,turn);
+            int finalscore = 0;
+            if((points) == -1){
+
+                finalscore =  Lost(fen);
                 if(turn == "b"){
                     finalscore = finalscore*-1;
-                    // cout<<finalscore;
-                    return finalscore;
                 }
-                return finalscore;
             }
+            else if((points) == 1){
+                finalscore = RowScore(files,fen,turn);
+                if(turn == "b"){
+                    finalscore = finalscore*-1;
+                }
+                
+            }
+            return finalscore;
         }
 
         void Score(vector<string>files,string turn,string fen){
 
-            if(Evaluate(fen,turn) == 0){
+            // if(Evaluate(fen,turn) == 0){
                 if(Point1(fen) == 0){
                     cout<< 0;
-                    return;
+                    // return;
                 }
-            }
-            // else{
-                int finalscore = 0;
+            // }
+            else{
                 int material = Evaluate(fen,turn);
-                if(Point1(fen) == -1){
-                    finalscore =  Evaluate(fen,turn);
-                }
-                else{
-                    int mobility = Mobility(files,turn);
-                    int attack = Attack(files,turn);
-                    finalscore = material + mobility + attack;
-                }
+                int mobility = Mobility(files,turn);
+                int attack = Attack(files,turn);
                 // cout<<material<<"..."<<mobility<<"..."<<attack<<endl;
+                int finalscore = material + mobility + attack;
                 if(turn == "b"){
                     finalscore = finalscore*-1;
                     cout<<finalscore;
@@ -1023,23 +1024,21 @@ class Congo{
                 }
                 cout<<finalscore;
                 // MyFile<<finalscore<<endl;
-            // }
+            }
         }
 
         void CallScore(){
-            vector<string> files = this->File;
-            string turn = this->Turn;
-            string fen = this->FEN;
-            Score(files,turn,fen);
+            // vector<string> files = this->File;
+            // string turn = this->Turn;
+            // string fen = this->FEN;
+            // Score(files,turn,fen);
         }
 
         vector<string> Execute(vector<string>curr_file,string move,string state,string turn){
             vector<int> P_in_river_before;
             vector<char> P;
             //state to work with
-            // vector<string>curr_file = this->File;
             int counter = this->M_number;
-            // string player = this->turn;
             //from
             int x_from = int(move[0]) -97;
             int y_from = move[1]-'0';
@@ -1063,7 +1062,7 @@ class Congo{
              good luck :/ 
             */
             for(int i=0;i<P_in_river_before.size();i++){
-                string file = File.at(3);
+                string file = curr_file.at(3);
                 //still here,haven't moved (x,y) 1 case 
                 if(P.at(i) == file[P_in_river_before.at(i)]){
                     curr_file.at(3)[P_in_river_before.at(i)] = '0';
@@ -1074,56 +1073,18 @@ class Congo{
                 }
             }
             //other stuff
-            Move_counter(counter,turn);
+            // Move_counter(counter,turn);
             // string state = State();
-            turn = Side_to_play(turn);
-            state =  To_fen(curr_file,counter,turn);
+            // turn = Side_to_play(turn);
+            // state =  To_fen(curr_file,counter,turn);
             return curr_file;
             // PrintFile();
         }
 
-        string State(){
-            string state = "Continue";
-            if(Turn == "w"){
-                bool black = true;
-                for(int i=0;i<3;i++){
-                    string file = File.at(i);
-                    int c = file.find('l');
-                    if(c!=-1){
-                        return state;
-                    }
-                    else{
-                        black = false;
-                    }
-                }
-                if(!black){
-                    return  "White wins";
-                }
-            }
-            else if(Turn == "b"){
-                bool white = true;
-                for(int i=4;i<7;i++){
-                    string file = File.at(i);
-                    int c = file.find('L');
-                    if(c!=-1){
-                        return state;
-                    }
-                    else{
-                        white = false;
-                    }
-
-                }
-                if(!white){
-                    return  "Black wins";
-                }
-            }
-            return state;
-        }
-
-        void Piece_in_River_before(vector<int>& P_in_river,vector<string>&curr_file,string turn){
+        void Piece_in_River_before(vector<int>& P_in_river,vector<string>curr_file,string turn){
             //store the coordiante
             for(int i=0;i<7;i++){
-                if(turn=="w"){
+                if(turn == "w"){
                     if(isupper(curr_file.at(3)[i])){
                         P_in_river.push_back(i);
                     }
@@ -1136,18 +1097,18 @@ class Congo{
             }
         }
 
-        string Side_to_play(string player){
-            if(player=="b"){
-                player = "w";
+        string Side_to_play(string turn){
+            if(turn == "b"){
+                turn = "w";
             }
-            else{
-                player = "b";
+            else if(turn =="w"){
+                turn = "b";
             }
-            return player;
+            return turn;
         }
 
-        void Move_counter(int &counter,string player){
-            if(player == "b"){
+        void Move_counter(int &counter,string turn){
+            if(turn == "b"){
                 counter++;
             }
         }
@@ -1171,7 +1132,7 @@ class Congo{
             curr_file.at(y1)[x1] = '0';
         }
 
-        string To_fen(vector<string>&curr_file,int counter,string player){
+        string To_fen(vector<string>curr_file,int counter,string turn){
             string fen = "";
             for(int i=0;i<7;i++){
                 string file = curr_file.at(i);
@@ -1196,7 +1157,7 @@ class Congo{
                 }
             }
             fen+=" ";
-            fen+=player;
+            fen+=turn;
             fen+=" ";
             fen+= to_string(counter);
             return fen;
@@ -1308,16 +1269,11 @@ int main(){
     cin>>N;
     cin.ignore();
     for(int i=0;i<N;i++){
-        // if(i%2!=0){
-        //     string move;
-        //     getline(cin,move);
-        //     moves_vector.push_back(move);
-        // }
-        // else{
-            string fen;
-            getline(cin,fen);
-            fen_vector.push_back(fen);
-        // }
+        
+        string fen;
+        getline(cin,fen);
+        fen_vector.push_back(fen);
+        
     }
 
     for(int i=0;i<N;i++){
@@ -1429,9 +1385,9 @@ int main(){
         // congo.Execute();
         // congo.Score();
         // cout<<endl;
-        // congo.Play();
+        congo.Play();
         // congo.game();
-        congo.CallScore();
+        // congo.CallScore();
         
         clearArray();
 

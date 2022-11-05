@@ -4,7 +4,7 @@
 #include <fstream>
 using namespace std;
 
-ofstream MyFile("filename.txt");
+// ofstream MyFile("filename.txt");
 class Point{
     private:
         Point *Parent;  //for later cool stuff
@@ -778,7 +778,7 @@ class Congo{
             // PrintFile(File);
             int v = MinMax(this->FEN,this->File,this->Turn,this->M_number,2);
             cout<<v;
-            MyFile<<v<<endl;;
+            // MyFile<<v<<endl;;
             // cout<<endl;
             // PrintFile(File);
             // cout<<endl;

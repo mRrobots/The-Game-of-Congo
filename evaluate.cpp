@@ -820,10 +820,11 @@ class Congo{
 
             int score = 0;
             int points = Point1();
-            //point 1
+            //point 1 //draw
             if(points == 0){
                 return score;
             }
+            //one the lion  is not there
             else if(points == -1){
                 int blackking = FEN.find('l');
                 int whiteking = FEN.find('L');
@@ -839,17 +840,22 @@ class Congo{
                 }
             }
              //point 4
-            int wscore = Wvalue();
-            int bscore = Bvalue();
-            score = wscore - bscore;
-            return score;
+             else if(points == 1 ){
+                int wscore = Wvalue();
+                int bscore = Bvalue();
+                score = wscore - bscore;
+                return score;
+              }
         }
 
         void Score(){
             if(Evaluate() == 0){
-                cout<< 0;
+                if(Point1() == 0){
+                    cout<< 0;
+                    return;
+                }
             }
-            else{
+            // else{
                 int finalscore = Evaluate();
                 if(Turn == "b"){
                     finalscore = finalscore*-1;
@@ -857,7 +863,7 @@ class Congo{
                     return;
                 }
                 cout<<finalscore;
-            }
+            // }
         }
 
         void Execute(){

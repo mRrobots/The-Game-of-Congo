@@ -759,9 +759,47 @@ class Congo{
             }
         }
 
+        /* Part3#Pseudocode(){
+            1 vector for storing coor Pieces in river (P_river)
+            2 vector for storing Pieces in river to compare (P)
+            
+            3 move
+              eg
+                x_from (a1a2) x_from = a
+                y_from (a1a2)  y_from = 1
+                x_to   (a1a2) x_to = a
+                y_to   (a1a2)  y_to = 2
+
+            3 store pieces(P_river) in river for player who's playing
+            in vector(they at row (col 3), just store the x coor)
+
+            4 store piece in P, that is in river
+             for( i in P_rive)
+               P.push(piece name()) eg "s"
+
+            5 now move piece from to
+               from will be empty now
+               to will occupy the piece that just moved
+
+            6
+            *remove piece in river
+               2 cases: 
+                1.moved
+                  haven't change it's y_coordinate
+                  remove
+                2.haven't moved
+                 remove it
+
+            7 increase counter if black to play
+            8 new state(in terms of winn() or contin)
+            9 change player(if it was b, now it w)
+            
+
+         }*/
+
         void Execute(){
-            vector<int> P_in_river_before;
-            vector<char> P;
+            vector<int> P_in_river_before; //for coordinate of piece in river
+            vector<char> P; //piece in the river
             //from
             int x_from = int(Move[0]) -97;
             int y_from = Move[1]-'0';
@@ -817,7 +855,6 @@ class Congo{
                     else{
                         black = false;
                     }
-
                 }
                 if(!black){
                     return  "White wins";
